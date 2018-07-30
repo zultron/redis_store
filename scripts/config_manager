@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
+import redis
+
 import roslib; roslib.load_manifest('redis_store')
 import rospy
 import os
@@ -40,27 +42,27 @@ class ConfigManager(object):
 
     def _advertise_service(self):
         self._getparam_srv = rospy.Service(
-            '/config_manager/get_param',
+            'config_manager/get_param',
             GetParam,
             self._getparam_srv_cb
         )
         self._setparam_srv = rospy.Service(
-            '/config_manager/set_param',
+            'config_manager/set_param',
             SetParam,
             self._setparam_srv_cb
         )
         self._saveparam_srv = rospy.Service(
-            '/config_manager/save_param',
+            'config_manager/save_param',
             SaveDeleteParam,
             self._saveparam_srv_cb
         )
         self._deleteparam_srv = rospy.Service(
-            '/config_manager/delete_param',
+            'config_manager/delete_param',
             SaveDeleteParam,
             self._deleteparam_srv_cb
         )
         self._resetparams_srv = rospy.Service(
-            '/config_manager/reset_params',
+            'config_manager/reset_params',
             ResetParams,
             self._resetparams_srv_cb
         )
@@ -79,6 +81,14 @@ class ConfigManager(object):
             port=redis_port,
             db=redis_db,
         )
+
+        try:
+            self._local.redis.ping()
+        except redis.ConnectionError:
+            rospy.logerr("Could not establish a connection to the Redis server {}:{}".format(
+                redis_host, redis_port,
+            ))
+            sys.exit(1)
 
     def _load_defaults(self, path):
         try:

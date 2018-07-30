@@ -1,7 +1,34 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="use_daemon" default="false" />
+  <arg name="port" default="62345" />
   <arg name="defaults_path" default="$(find redis_store)/config"/>
-  <node pkg="redis_store" type="config_manager" name="config_manager">
+
+  <arg name="test_mode" default="false" />
+
+  <group if="$(arg use_daemon)">
+    <param name="redis_port" value="$(arg port)" />
+    <param name="redis_host" value="$(optenv ROS_HOSTNAME localhost)" />
+  </group>
+
+  <group unless="$(arg use_daemon)">
+  	<!-- launch in test mode -->
+  	<group if="$(arg test_mode)">
+  		<node name="redis_server" pkg="redis_store" type="redis_server">
+  			<param name="test_mode" value="true"/>
+  		</node>
+  	</group>
+  	<!-- launch in non-test, i.e. normal, mode -->
+  	<group unless="$(arg test_mode)">
+  		<param name="redis_port" value="$(arg port)" />
+  		<param name="redis_host" value="$(optenv HOSTNAME localhost)" />
+
+  	  <node name="redis_server" pkg="redis_store" type="redis_server">
+  	  </node>
+  	</group>
+  </group>
+
+  <node pkg="redis_store" type="config_manager" name="config_manager" output="screen">
     <param name="defaults_path" value="$(arg defaults_path)"/>
   </node>
 </launch>
