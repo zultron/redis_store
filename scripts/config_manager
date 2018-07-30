@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
-
-# !/usr/bin/env python
-
-from __future__ import print_function
 import roslib; roslib.load_manifest('redis_store')
 import rospy
 import os
 import collections
 import json
 import six
-# import xmlrpclib
-# from bson.binary import Binary
-
-# import mongodb_store.util
 
 from redis_store.srv import (
     GetParam, SetParam, SaveDeleteParam, ResetParams,
