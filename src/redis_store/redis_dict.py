@@ -1,5 +1,6 @@
 # coding=utf-8
 # adapted from https://github.com/Attumm/redis-dict
+import json
 from redis import StrictRedis
 
 from contextlib import contextmanager
@@ -35,11 +36,13 @@ class RedisDict(object):
         if result is None:
             raise KeyError
 
-        return result if result != self.sentinel_none else None
+        return self._decode(result) if result != self.sentinel_none else None
 
     def __setitem__(self, k, v):
         if v is None:
             v = self.sentinel_none
+        else:
+            v = self._encode(v)
         self.redis.set(self.namespace + k, v, ex=self.expire)
 
     def __delitem__(self, k):
@@ -56,6 +59,14 @@ class RedisDict(object):
 
     def __len__(self):
         return len(self._keys())
+
+    @staticmethod
+    def _encode(data):
+        return json.dumps(data)
+
+    @staticmethod
+    def _decode(data):
+        return json.loads(data)
 
     def _scan_keys(self, search_term=''):
         return self.redis.scan(match=self.namespace + search_term + '*')
@@ -106,7 +117,7 @@ class RedisDict(object):
         if len(found_keys) == 0:
             return []
 
-        return self.redis.mget(found_keys)
+        return [self._decode(item) for item in self.redis.mget(found_keys)]
 
     def multi_chain_get(self, keys):
         return self.multi_get(':'.join(keys))
@@ -116,7 +127,8 @@ class RedisDict(object):
         if len(keys) == 0:
             return {}
         to_rm = len(self.namespace)
-        return dict(zip([i[to_rm:] for i in keys], self.redis.mget(keys)))
+        return dict(zip([i[to_rm:] for i in keys],
+                        [self._decode(item) for item in self.redis.mget(keys)]))
 
     def multi_del(self, key):
         keys = self._keys(key)

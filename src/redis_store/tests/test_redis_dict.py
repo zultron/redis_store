@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 from collections import namedtuple
 
 import pytest
@@ -13,6 +14,14 @@ redis_config = {
     'port': 6379,
     'db': 0,
 }
+
+
+def encode_data(data):
+    return json.dumps(data)
+
+
+def decode_data(data):
+    return json.loads(data)
 
 
 def create_redis_dict(namespace=TEST_NAMESPACE_PREFIX, **kwargs):
@@ -76,6 +85,16 @@ def test_set_and_get_multiple(db):
     assert db.r['foobar2'] == 'barbar2'
 
 
+@pytest.mark.parametrize('data', [
+    {'wonner': 888.66, 'deplored': 'FaX5yjxS'},
+    [756.54, 52.57, 395.22, 278.86, 40.59],
+])
+def test_setting_and_getting_complex_python_data_types_works(db, data):
+    db.r['ssp'] = data
+
+    assert db.r['ssp'] == data
+
+
 def test_get_nonexisting(db):
     """Test that retrieving a non-existing key raises a KeyError."""
     with pytest.raises(KeyError):
@@ -114,7 +133,7 @@ def test_repr_empty(db):
 def test_repr_nonempty(db):
     """Tests the __repr__ function with keys set."""
     db.r['foobars'] = 'barrbars'
-    expected_repr = str({u'foobars': u'barrbars'})
+    expected_repr = str({u'foobars': unicode(encode_data('barrbars'))})
     actual_repr = repr(db.r)
 
     assert actual_repr == expected_repr
@@ -123,7 +142,7 @@ def test_repr_nonempty(db):
 def test_str_nonempty(db):
     """Tests the __repr__ function with keys set."""
     db.r['foobars'] = 'barrbars'
-    expected_str = str({u'foobars': u'barrbars'})
+    expected_str = str({u'foobars': unicode(encode_data('barrbars'))})
     actual_str = str(db.r)
 
     assert actual_str == expected_str
@@ -153,7 +172,7 @@ def test_to_dict_empty(db):
 def test_to_dict_nonempty(db):
     """Tests the to_dict function with keys set."""
     db.r['foobar'] = 'barbaros'
-    expected_dict = {u'foobar': u'barbaros'}
+    expected_dict = {'foobar': encode_data('barbaros')}
     actual_dict = db.r.to_dict()
 
     assert actual_dict == expected_dict
@@ -165,7 +184,7 @@ def test_chain_set_1(db):
 
     expected_key = '{}:foo'.format(TEST_NAMESPACE_PREFIX)
 
-    assert db.redisdb.get(expected_key) == 'melons'
+    assert db.redisdb.get(expected_key) == encode_data('melons')
 
 
 def test_chain_set_2(db):
@@ -174,7 +193,7 @@ def test_chain_set_2(db):
 
     expected_key = '{}:foo:bar'.format(TEST_NAMESPACE_PREFIX)
 
-    assert db.redisdb.get(expected_key) == 'melons'
+    assert db.redisdb.get(expected_key) == encode_data('melons')
 
 
 def test_chain_set_overwrite(db):
@@ -184,7 +203,7 @@ def test_chain_set_overwrite(db):
 
     expected_key = '{}:foo'.format(TEST_NAMESPACE_PREFIX)
 
-    assert db.redisdb.get(expected_key) == 'bananas'
+    assert db.redisdb.get(expected_key) == encode_data('bananas')
 
 
 def test_chain_get_1(db):
