@@ -1,5 +1,6 @@
+# fetches a param from the local db, defaults and rosparam
+
 string param_name
 ---
 bool success
 string param_value
-

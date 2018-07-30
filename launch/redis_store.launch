@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="defaults_path" default="$(find redis_store)/config"/>
+  <node pkg="redis_store" type="config_manager" name="config_manager">
+    <param name="defaults_path" value="$(arg defaults_path)"/>
+  </node>
+</launch>

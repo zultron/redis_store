@@ -101,6 +101,20 @@ def test_get_nonexisting(db):
         _ = db.r['nonexistingkey']
 
 
+def test_get_with_existing_key_returns_existing_key(db):
+    db.r['barrage'] = 989
+
+    assert db.r.get('barrage') == 989
+
+
+def test_get_with_nonexisting_key_returns_none(db):
+    assert db.r.get('expel') is None
+
+
+def test_get_with_nonexistent_key_and_default_returns_default(db):
+    assert db.r.get('cathect', 504) == 504
+
+
 def test_delete(db):
     """Test deleting a key."""
     db.r['foobargone'] = 'bars'
@@ -383,3 +397,13 @@ def test_multi_del_complex(db):
     assert db.redisdb.get('foobar') is None
     assert db.redisdb.get('foobaz') is None
     assert db.r['goobar'] == 'borbor'
+
+
+def test_clear_dict_clears_all_key_values(db):
+    db.r['tarbush'] = 156.03
+    db.r['reform'] = 'C4rxqkcm'
+
+    db.r.clear()
+
+    assert len(db.r) == 0
+

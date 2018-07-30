@@ -1,0 +1,4 @@
+# resets all parameters to their defaults and removes any additional local parameters
+
+---
+bool success

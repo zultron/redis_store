@@ -38,6 +38,12 @@ class RedisDict(object):
 
         return self._decode(result) if result != self.sentinel_none else None
 
+    def get(self, name, default=None):
+        try:
+            return self[name]
+        except KeyError:
+            return default
+
     def __setitem__(self, k, v):
         if v is None:
             v = self.sentinel_none
@@ -138,6 +144,10 @@ class RedisDict(object):
 
     def items(self):
         return zip(self.keys(), self.multi_get(self._keys()))
+
+    def clear(self):
+        for key in self._keys():
+            self.redis.delete(key)
 
 
 class RedisListIterator(object):

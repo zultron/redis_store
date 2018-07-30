@@ -9,6 +9,7 @@ project(redis_store)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   message_generation
+  std_msgs
   rospy
 )
 
@@ -56,7 +57,9 @@ catkin_python_setup()
 add_service_files(
   FILES
   GetParam.srv
+  ResetParams.srv
   SetParam.srv
+  SaveDeleteParam.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -67,10 +70,10 @@ add_service_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs  # Or other packages containing msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
