@@ -2,7 +2,9 @@
 <launch>
   <arg name="use_daemon" default="false" />
   <arg name="port" default="62345" />
-  <arg name="defaults_path" default="$(find redis_store)/config"/>
+  <arg name="defaults_path" default=""/>
+  <arg name="db_namespace" default="ros"/>
+  <arg name="db" default="0"/>
 
   <arg name="test_mode" default="false" />
 
@@ -30,5 +32,7 @@
 
   <node pkg="redis_store" type="config_manager" name="config_manager" output="screen">
     <param name="defaults_path" value="$(arg defaults_path)"/>
+    <param name="redis_namespace" value="$(arg db_namespace)"/>
+    <param name="redis_db" value="$(arg db)"/>
   </node>
 </launch>

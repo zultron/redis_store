@@ -1,0 +1,14 @@
+<launch>
+
+  <include file="$(find redis_store)/launch/redis_store.launch">
+    <arg name="test_mode" value="true"/>
+    <arg name="defaults_path" value="$(find redis_store)/tests/integration/config"/>
+    <arg name="db_namespace" value="test"/>
+    <arg name="db" value="0"/>
+  </include>
+
+  <param name="test_module" value="$(find redis_store)/tests/integration/" />
+  <param name="redis_namespace" value="test"/>
+  <param name="redis_db" value="0"/>
+  <test test-name="test_integration" pkg="ros_pytest" type="ros_pytest_runner" />
+</launch>

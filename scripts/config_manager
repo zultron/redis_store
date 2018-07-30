@@ -76,7 +76,7 @@ class ConfigManager(object):
         self._defaults = {}
         self._defaults_source = {}
         self._local = RedisDict(
-            namespace='{}/local'.format(redis_namespace),
+            namespace=redis_namespace,
             host=redis_host,
             port=redis_port,
             db=redis_db,
@@ -204,7 +204,7 @@ class ConfigManager(object):
         """
         This will take the current value from the rosparam server and save it into the DB
         """
-        if not rospy.has_param(req.param):
+        if not rospy.has_param(req.param_name):
             rospy.logerr("Trying to set a parameter from ros parameter server, but it is not on server.")
             return SaveDeleteParamResponse(False)
 
