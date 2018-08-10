@@ -52,6 +52,7 @@ def redis():
     )
 
 
+@pytest.mark.dependency()
 def test_verify_that_example_default_parameters_have_been_set(node, redis):
     assert rospy.get_param('global_waypoints/foo') == [0, 1, 2, 3, 4, 5]
     assert rospy.get_param('foo/bar') == 'something'
@@ -79,6 +80,7 @@ def test_ros_param_that_is_not_in_defaults_is_read_back_correctly(node, get_para
     assert res.param_value == '7Cq'
 
 
+@pytest.mark.dependency()
 def test_set_param_service_updates_ros_parameter(node, set_param):
     res = set_param('prees', json.dumps(514.29))
 
@@ -86,6 +88,7 @@ def test_set_param_service_updates_ros_parameter(node, set_param):
     assert rospy.get_param('prees') == pytest.approx(514.29)
 
 
+@pytest.mark.dependency()
 def test_set_param_service_updates_redis_db(node, set_param, redis):
     res = set_param('euclases', json.dumps('LR1WJO'))
 
@@ -108,10 +111,10 @@ def test_save_param_fails_when_ros_param_does_not_exist(node, save_param, redis)
     assert res.success is False
 
 
-@pytest.mark.depends(
+@pytest.mark.dependency(depends=[
     'test_set_param_service_updates_ros_parameter',
-    'test_set_param_service_updates_redis_db'
-)
+    'test_set_param_service_updates_redis_db',
+])
 def test_delete_param_removes_ros_param_and_redis_entry(node, delete_param, set_param, redis):
     set_param('severe', json.dumps('MMWMJWL'))
 
@@ -122,11 +125,11 @@ def test_delete_param_removes_ros_param_and_redis_entry(node, delete_param, set_
     assert redis.get('severe', None) is None
 
 
-@pytest.mark.depends(
+@pytest.mark.dependency(depends=[
     'test_verify_that_example_default_parameters_have_been_set',
     'test_set_param_service_updates_ros_parameter',
-    'test_set_param_service_updates_redis_db'
-)
+    'test_set_param_service_updates_redis_db',
+])
 def test_reset_params_resets_params_back_to_default(node, set_param, reset_params, redis):
     set_param('foo/bar', json.dumps(90))
 
@@ -137,11 +140,11 @@ def test_reset_params_resets_params_back_to_default(node, set_param, reset_param
     assert redis.get('/foo/bar', None) is None
 
 
-@pytest.mark.depends(
+@pytest.mark.dependency(depends=[
     'test_verify_that_example_default_parameters_have_been_set',
     'test_set_param_service_updates_ros_parameter',
-    'test_set_param_service_updates_redis_db'
-)
+    'test_set_param_service_updates_redis_db',
+])
 def test_reset_params_removes_additional_params_from_redis(node, set_param, reset_params, redis):
     set_param('octonare', json.dumps(530))
 
