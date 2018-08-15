@@ -62,7 +62,7 @@ def test_get_param_service_returns_parameter_from_defaults(node, get_param):
     res = get_param('foo/bar')
 
     assert res.success is True
-    assert res.param_value == 'something'
+    assert res.param_value == '"something"'
 
 
 def test_get_param_with_nonexisting_parameter_is_unsuccessful(node, get_param):
@@ -77,7 +77,16 @@ def test_ros_param_that_is_not_in_defaults_is_read_back_correctly(node, get_para
     res = get_param('ladakhi')
 
     assert res.success is True
-    assert res.param_value == '7Cq'
+    assert res.param_value == '"7Cq"'
+
+
+def test_ros_param_with_complex_data_type_is_read_back_as_json(node, get_param):
+    rospy.set_param('lucarnes', [989, 292, 597, 584, 500])
+
+    res = get_param('lucarnes')
+
+    assert res.success is True
+    assert res.param_value == '[989, 292, 597, 584, 500]'
 
 
 @pytest.mark.dependency()

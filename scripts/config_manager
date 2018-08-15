@@ -184,7 +184,7 @@ class ConfigManager(object):
             response.success = False
             return response
         response.success = True
-        response.param_value = str(value)
+        response.param_value = json.dumps(value)
         return response
 
     def _setparam_srv_cb(self, req):
