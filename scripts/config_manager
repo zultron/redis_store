@@ -12,6 +12,7 @@ import six
 from redis_store.srv import (
     GetParam, SetParam, SaveDeleteParam, ResetParams,
     GetParamResponse, SetParamResponse, SaveDeleteParamResponse, ResetParamsResponse)
+from std_msgs.msg import String
 from redis_store import RedisDict
 from std_srvs.srv import *
 import rosparam
@@ -65,6 +66,11 @@ class ConfigManager(object):
             'config_manager/reset_params',
             ResetParams,
             self._resetparams_srv_cb
+        )
+        self._update_pub = rospy.Publisher(
+            'config_manager/update',
+            String,
+            queue_size=10,
         )
 
     def _create_dbs(self):
@@ -198,6 +204,7 @@ class ConfigManager(object):
             return SetParamResponse(False)
         self._local[req.param_name] = value
         rospy.set_param(req.param_name, value)
+        self._update_pub.publish(req.param_name)
         return SetParamResponse(True)
 
     def _saveparam_srv_cb(self, req):
@@ -222,16 +229,22 @@ class ConfigManager(object):
         if req.param_name in self._local:
             del self._local[req.param_name]
 
+        self._update_pub.publish(req.param_name)
+
         return SaveDeleteParamResponse(True)
 
     def _resetparams_srv_cb(self, _req):
         """
         This will reset the params to the default value and clear out any additional local settings.
         """
+        local_names = self._local[:]
         for name in self._local:
             rospy.delete_param(name)
         self._local.clear()
         self._load_settings_into_rosparam()
+
+        for name in set(self._defaults.keys() + local_names):
+            self._update_pub.publish(name)
 
         return ResetParamsResponse(True)
 
