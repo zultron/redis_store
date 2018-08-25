@@ -32,9 +32,11 @@ class RedisServer(object):
         if self.test_mode:
             default_host = 'localhost'
             default_port = self._find_free_port(default_host, 49152, 65535)
+            default_config = ''
         else:
             default_host = 'localhost'
             default_port = 6379
+            default_config = ''
 
         is_master = rospy.get_param('~master', True)
 
@@ -43,13 +45,17 @@ class RedisServer(object):
             rospy.set_param('redis_host', self._redis_host)
             self._redis_port = rospy.get_param('redis_port', default_port)
             rospy.set_param('redis_port', self._redis_port)
+            self._redis_config = rospy.get_param('redis_config', default_config)
+            rospy.set_param('redis_config', self._redis_config)
         else:
             self._redis_host = rospy.get_param('~host')
             self._redis_port = rospy.get_param('~port')
+            self._redis_config = rospy.get_param('~config')
 
         rospy.loginfo('Redis server address: {}:{}'.format(
             self._redis_host, self._redis_port)
         )
+        rospy.loginfo('Redis config: {}'.format(self._redis_config))
 
         self._check_if_redis_server_is_installed()
 
@@ -91,7 +97,11 @@ class RedisServer(object):
         def block_kill():
             os.setpgrp()
 
-        cmd = ['redis-server', '--port', str(self._redis_port)]
+        cmd = ['redis-server']
+        if self._redis_config:
+            cmd.append(str(self._redis_config))
+        cmd += ['--port', str(self._redis_port)]
+
         self._redis_process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
