@@ -16,21 +16,21 @@
   </group>
 
   <group unless="$(arg use_daemon)">
-  	<!-- launch in test mode -->
-  	<group if="$(arg test_mode)">
-  		<node name="redis_server" pkg="redis_store" type="redis_server">
-  			<param name="test_mode" value="$(arg test_mode)"/>
-  		</node>
-  	</group>
-  	<!-- launch in non-test, i.e. normal, mode -->
-  	<group unless="$(arg test_mode)">
-  		<param name="redis_port" value="$(arg port)" />
+    <!-- launch in test mode -->
+    <group if="$(arg test_mode)">
+      <node name="redis_server" pkg="redis_store" type="redis_server">
+  	<param name="test_mode" value="$(arg test_mode)"/>
+      </node>
+    </group>
+    <!-- launch in non-test, i.e. normal, mode -->
+    <group unless="$(arg test_mode)">
+      <param name="redis_port" value="$(arg port)" />
       <param name="redis_config" value="$(arg config)" />
-  		<param name="redis_host" value="$(optenv HOSTNAME localhost)" />
+      <param name="redis_host" value="$(optenv HOSTNAME localhost)" />
 
-  	  <node name="redis_server" pkg="redis_store" type="redis_server">
-  	  </node>
-  	</group>
+      <node name="redis_server" pkg="redis_store" type="redis_server">
+      </node>
+    </group>
   </group>
 
   <node pkg="redis_store" type="config_manager" name="config_manager" output="screen">
