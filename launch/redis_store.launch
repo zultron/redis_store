@@ -26,7 +26,7 @@
     <group unless="$(arg test_mode)">
       <param name="redis_port" value="$(arg port)" />
       <param name="redis_config" value="$(arg config)" />
-      <param name="redis_host" value="$(optenv HOSTNAME localhost)" />
+      <param name="redis_host" value="$(optenv ROS_HOSTNAME localhost)" />
 
       <node name="redis_server" pkg="redis_store" type="redis_server">
       </node>
