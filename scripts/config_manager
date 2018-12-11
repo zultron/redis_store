@@ -3,7 +3,9 @@
 import redis
 import sys
 
-import roslib; roslib.load_manifest('redis_store')
+import roslib
+
+roslib.load_manifest('redis_store')
 import rospy
 import os
 import collections
@@ -11,15 +13,23 @@ import json
 import six
 
 from redis_store.srv import (
-    GetParam, SetParam, SaveDeleteParam, ResetParams,
-    GetParamResponse, SetParamResponse, SaveDeleteParamResponse, ResetParamsResponse)
+    GetParam,
+    SetParam,
+    SaveDeleteParam,
+    ResetParams,
+    GetParamResponse,
+    SetParamResponse,
+    SaveDeleteParamResponse,
+    ResetParamsResponse,
+)
 from std_msgs.msg import String
 from redis_store import RedisDict
+from redis_store.config import ConfigBase
 from std_srvs.srv import *
 import rosparam
 
 
-class ConfigManager(object):
+class ConfigManager(ConfigBase):
     def __init__(self):
         rospy.init_node("config_manager")
 
@@ -44,34 +54,22 @@ class ConfigManager(object):
 
     def _advertise_service(self):
         self._getparam_srv = rospy.Service(
-            'config_manager/get_param',
-            GetParam,
-            self._getparam_srv_cb
+            self._GET_PARAM_SRV_NAME, GetParam, self._getparam_srv_cb
         )
         self._setparam_srv = rospy.Service(
-            'config_manager/set_param',
-            SetParam,
-            self._setparam_srv_cb
+            self._SET_PARAM_SRV_NAME, SetParam, self._setparam_srv_cb
         )
         self._saveparam_srv = rospy.Service(
-            'config_manager/save_param',
-            SaveDeleteParam,
-            self._saveparam_srv_cb
+            self._SAVE_PARAM_SRV_NAME, SaveDeleteParam, self._saveparam_srv_cb
         )
         self._deleteparam_srv = rospy.Service(
-            'config_manager/delete_param',
-            SaveDeleteParam,
-            self._deleteparam_srv_cb
+            self._DELETE_PARAM_SRV_NAME, SaveDeleteParam, self._deleteparam_srv_cb
         )
         self._resetparams_srv = rospy.Service(
-            'config_manager/reset_params',
-            ResetParams,
-            self._resetparams_srv_cb
+            self._RESET_PARAMS_SRV_NAME, ResetParams, self._resetparams_srv_cb
         )
         self._update_pub = rospy.Publisher(
-            'config_manager/update',
-            String,
-            queue_size=10,
+            self._UPDATE_TOPIC_NAME, String, queue_size=10
         )
 
     def _create_dbs(self):
@@ -83,18 +81,17 @@ class ConfigManager(object):
         self._defaults = {}
         self._defaults_source = {}
         self._local = RedisDict(
-            namespace=redis_namespace,
-            host=redis_host,
-            port=redis_port,
-            db=redis_db,
+            namespace=redis_namespace, host=redis_host, port=redis_port, db=redis_db
         )
 
         try:
             self._local.redis.ping()
         except redis.ConnectionError:
-            rospy.logerr("Could not establish a connection to the Redis server {}:{}".format(
-                redis_host, redis_port,
-            ))
+            rospy.logerr(
+                "Could not establish a connection to the Redis server {}:{}".format(
+                    redis_host, redis_port
+                )
+            )
             sys.exit(1)
 
     def _load_defaults(self, path):
@@ -113,8 +110,10 @@ class ConfigManager(object):
             try:
                 path = os.path.join(roslib.packages.get_pkg_dir(pkg), pkg_dir)
             except roslib.packages.InvalidROSPkgException:
-                rospy.logerr("Supplied defaults path '%s' cannot be found. \n" % path +
-                             "The ROS package '%s' could not be located." % pkg)
+                rospy.logerr(
+                    "Supplied defaults path '%s' cannot be found. \n" % path
+                    + "The ROS package '%s' could not be located." % pkg
+                )
                 sys.exit(1)
         if not os.path.isdir(path):
             rospy.logwarn("Defaults path '%s' does not exist." % path)
@@ -152,8 +151,10 @@ class ConfigManager(object):
                 self._defaults[param] = val
                 self._defaults_source[param] = filename
             elif existing_source != filename:
-                rospy.logerr("Two defaults parameter files have the same key:\n%s and %s, key %s" %
-                             (existing_source, filename, param))
+                rospy.logerr(
+                    "Two defaults parameter files have the same key:\n%s and %s, key %s"
+                    % (existing_source, filename, param)
+                )
                 # Delete the entry so that it can be fixed...
                 if param in self._defaults:
                     del self._defaults[param]
@@ -172,9 +173,9 @@ class ConfigManager(object):
         for name in self._defaults.keys():
             val = self._defaults[name]
             filename = self._defaults_source[name]
-            rospy.loginfo('name: {}, value: {}, filename: {}'.format(
-                name, val, filename
-                ))
+            rospy.loginfo(
+                'name: {}, value: {}, filename: {}'.format(name, val, filename)
+            )
 
     def _getparam_srv_cb(self, req):
         """
@@ -213,7 +214,9 @@ class ConfigManager(object):
         This will take the current value from the rosparam server and save it into the DB
         """
         if not rospy.has_param(req.param_name):
-            rospy.logerr("Trying to set a parameter from ros parameter server, but it is not on server.")
+            rospy.logerr(
+                "Trying to set a parameter from ros parameter server, but it is not on server."
+            )
             return SaveDeleteParamResponse(False)
 
         value = rospy.get_param(req.param_name)
