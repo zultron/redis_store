@@ -48,7 +48,7 @@ class ConfigClient(ConfigBase):
         return decoded
 
     def set_param(self, name, value):
-        response = self._set_param(name, value)
+        response = self._set_param(name, json.dumps(value))
         return response.success
 
     def save_param(self, name):
