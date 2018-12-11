@@ -4,12 +4,7 @@ import json
 import rospy
 
 from std_msgs.msg import String
-from redis_store.srv import (
-    GetParam,
-    SetParam,
-    SaveDeleteParam,
-    ResetParams
-)
+from redis_store.srv import GetParam, SetParam, SaveDeleteParam, ResetParams
 
 
 class ConfigBase(object):
@@ -22,10 +17,13 @@ class ConfigBase(object):
 
 
 class ConfigClient(ConfigBase):
-    def __init__(self):
-        self._update_sub = rospy.Subscriber(
-            self._UPDATE_TOPIC_NAME, String, self._update_received
-        )
+    def __init__(self, subscribe=False):
+        if subscribe:
+            self._update_sub = rospy.Subscriber(
+                self._UPDATE_TOPIC_NAME, String, self._update_received
+            )
+        else:
+            self._update_sub = None
         self._get_param = rospy.ServiceProxy(self._GET_PARAM_SRV_NAME, GetParam)
         self._set_param = rospy.ServiceProxy(self._SET_PARAM_SRV_NAME, SetParam)
         self._save_param = rospy.ServiceProxy(
@@ -62,6 +60,10 @@ class ConfigClient(ConfigBase):
     def reset_params(self):
         response = self._reset_params()
         return response.success
+
+    def stop(self):
+        if self._update_sub:
+            self._update_sub.unregister()
 
     def _update_received(self, msg):
         for cb in self.on_update_received:

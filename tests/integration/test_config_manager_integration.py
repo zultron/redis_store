@@ -12,7 +12,7 @@ def node():
 
 @pytest.fixture
 def client():
-    return ConfigClient()
+    return ConfigClient(subscribe=True)
 
 
 @pytest.fixture
