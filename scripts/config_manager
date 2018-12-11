@@ -238,8 +238,8 @@ class ConfigManager(object):
         """
         This will reset the params to the default value and clear out any additional local settings.
         """
-        local_names = self._local[:]
-        for name in self._local:
+        local_names = self._local.keys()[:]
+        for name in local_names:
             rospy.delete_param(name)
         self._local.clear()
         self._load_settings_into_rosparam()
