@@ -97,7 +97,7 @@ def test_setting_and_getting_complex_python_data_types_works(db, data):
 def test_get_nonexisting(db):
     """Test that retrieving a non-existing key raises a KeyError."""
     with pytest.raises(KeyError):
-        _ = db.r['nonexistingkey']
+        _ = db.r['nonexistingkey']  # noqa: F841
 
 
 def test_get_with_existing_key_returns_existing_key(db):
@@ -146,7 +146,7 @@ def test_repr_empty(db):
 def test_repr_nonempty(db):
     """Tests the __repr__ function with keys set."""
     db.r['foobars'] = 'barrbars'
-    expected_repr = str({u'foobars': unicode(encode_data('barrbars'))})
+    expected_repr = str({u'foobars': encode_data('barrbars').decode()})
     actual_repr = repr(db.r)
 
     assert actual_repr == expected_repr
@@ -155,7 +155,7 @@ def test_repr_nonempty(db):
 def test_str_nonempty(db):
     """Tests the __repr__ function with keys set."""
     db.r['foobars'] = 'barrbars'
-    expected_str = str({u'foobars': unicode(encode_data('barrbars'))})
+    expected_str = str({u'foobars': encode_data('barrbars').decode()})
     actual_str = str(db.r)
 
     assert actual_str == expected_str
@@ -229,7 +229,7 @@ def test_chain_get_1(db):
 def test_chain_get_empty(db):
     """Test getting a chain that has not been set."""
     with pytest.raises(KeyError):
-        _ = db.r.chain_get(['foo'])
+        _ = db.r.chain_get(['foo'])  # noqa: F841
 
 
 def test_chain_get_2(db):
@@ -245,7 +245,7 @@ def test_chain_del_1(db):
     db.r.chain_del(['foo'])
 
     with pytest.raises(KeyError):
-        _ = db.r.chain_get(['foo'])
+        _ = db.r.chain_get(['foo'])  # noqa: F841
 
 
 def test_chain_del_2(db):
@@ -254,7 +254,7 @@ def test_chain_del_2(db):
     db.r.chain_del(['foo', 'bar'])
 
     with pytest.raises(KeyError):
-        _ = db.r.chain_get(['foo', 'bar'])
+        _ = db.r.chain_get(['foo', 'bar'])  # noqa: F841
 
 
 def test_expire_context(db):

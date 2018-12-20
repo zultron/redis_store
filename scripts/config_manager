@@ -5,7 +5,6 @@ import sys
 
 import roslib
 
-roslib.load_manifest('redis_store')
 import rospy
 import os
 import collections
@@ -25,7 +24,6 @@ from redis_store.srv import (
 from std_msgs.msg import String
 from redis_store import RedisDict
 from redis_store.config import ConfigBase
-from std_srvs.srv import *
 import rosparam
 
 
