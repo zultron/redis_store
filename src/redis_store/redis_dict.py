@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 # adapted from https://github.com/Attumm/redis-dict
 import json
 from redis import StrictRedis
