@@ -52,8 +52,8 @@ class RedisServer(object):
             self._redis_port = rospy.get_param('~port')
             self._redis_config = rospy.get_param('~config')
 
-        rospy.loginfo('Redis server address: {}:{}'.format(
-            self._redis_host, self._redis_port)
+        rospy.loginfo(
+            'Redis server address: {}:{}'.format(self._redis_host, self._redis_port)
         )
         rospy.loginfo('Redis config: {}'.format(self._redis_config))
 
@@ -103,9 +103,7 @@ class RedisServer(object):
         cmd += ['--port', str(self._redis_port)]
 
         self._redis_process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            preexec_fn=block_kill
+            cmd, stdout=subprocess.PIPE, preexec_fn=block_kill
         )
         while self._redis_process.poll() is None:
             try:
@@ -128,9 +126,11 @@ class RedisServer(object):
             rospy.logerr('Redis server process stopped')
 
         if self._redis_process.returncode != 0:
-            rospy.logerr('Redis server process error. Exit code {}'.format(
-                self._redis_process.returncode
-            ))
+            rospy.logerr(
+                'Redis server process error. Exit code {}'.format(
+                    self._redis_process.returncode
+                )
+            )
 
         self._gone_down = True
         self._ready = False

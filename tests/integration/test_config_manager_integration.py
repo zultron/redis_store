@@ -22,10 +22,7 @@ def redis():
     redis_namespace = rospy.get_param('redis_namespace')
     redis_db = rospy.get_param('redis_db')
     return RedisDict(
-        namespace=redis_namespace,
-        host=redis_host,
-        port=redis_port,
-        db=redis_db,
+        namespace=redis_namespace, host=redis_host, port=redis_port, db=redis_db
     )
 
 
@@ -94,10 +91,12 @@ def test_save_param_fails_when_ros_param_does_not_exist(node, client, redis):
     assert success is False
 
 
-@pytest.mark.dependency(depends=[
-    'test_set_param_service_updates_ros_parameter',
-    'test_set_param_service_updates_redis_db',
-])
+@pytest.mark.dependency(
+    depends=[
+        'test_set_param_service_updates_ros_parameter',
+        'test_set_param_service_updates_redis_db',
+    ]
+)
 def test_delete_param_removes_ros_param_and_redis_entry(node, client, redis):
     client.set_param('severe', 'MMWMJWL')
 
@@ -108,11 +107,13 @@ def test_delete_param_removes_ros_param_and_redis_entry(node, client, redis):
     assert redis.get('severe', None) is None
 
 
-@pytest.mark.dependency(depends=[
-    'test_verify_that_example_default_parameters_have_been_set',
-    'test_set_param_service_updates_ros_parameter',
-    'test_set_param_service_updates_redis_db',
-])
+@pytest.mark.dependency(
+    depends=[
+        'test_verify_that_example_default_parameters_have_been_set',
+        'test_set_param_service_updates_ros_parameter',
+        'test_set_param_service_updates_redis_db',
+    ]
+)
 def test_reset_params_resets_params_back_to_default(node, client, redis):
     client.set_param('foo/bar', 90)
 
@@ -123,11 +124,13 @@ def test_reset_params_resets_params_back_to_default(node, client, redis):
     assert redis.get('/foo/bar', None) is None
 
 
-@pytest.mark.dependency(depends=[
-    'test_verify_that_example_default_parameters_have_been_set',
-    'test_set_param_service_updates_ros_parameter',
-    'test_set_param_service_updates_redis_db',
-])
+@pytest.mark.dependency(
+    depends=[
+        'test_verify_that_example_default_parameters_have_been_set',
+        'test_set_param_service_updates_ros_parameter',
+        'test_set_param_service_updates_redis_db',
+    ]
+)
 def test_reset_params_removes_additional_params_from_redis(node, client, redis):
     client.set_param('octonare', 530)
 

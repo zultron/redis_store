@@ -9,11 +9,7 @@ from redis_store.redis_dict import RedisDict
 # !! Make sure you don't have keys named like this, they will be deleted.
 TEST_NAMESPACE_PREFIX = 'test_rd'
 
-redis_config = {
-    'host': 'localhost',
-    'port': 6379,
-    'db': 0,
-}
+redis_config = {'host': 'localhost', 'port': 6379, 'db': 0}
 
 
 def encode_data(data):
@@ -85,10 +81,13 @@ def test_set_and_get_multiple(db):
     assert db.r['foobar2'] == 'barbar2'
 
 
-@pytest.mark.parametrize('data', [
-    {'wonner': 888.66, 'deplored': 'FaX5yjxS'},
-    [756.54, 52.57, 395.22, 278.86, 40.59],
-])
+@pytest.mark.parametrize(
+    'data',
+    [
+        {'wonner': 888.66, 'deplored': 'FaX5yjxS'},
+        [756.54, 52.57, 395.22, 278.86, 40.59],
+    ],
+)
 def test_setting_and_getting_complex_python_data_types_works(db, data):
     db.r['ssp'] = data
 
@@ -280,10 +279,7 @@ def test_expire_keyword(db):
 
 def test_iter(db):
     """Tests the __iter__ function."""
-    key_values = {
-        'foobar1': 'barbar1',
-        'foobar2': 'barbar2',
-    }
+    key_values = {'foobar1': 'barbar1', 'foobar2': 'barbar2'}
 
     for key, value in key_values.items():
         db.r[key] = value

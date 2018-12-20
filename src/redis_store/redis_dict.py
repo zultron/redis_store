@@ -133,8 +133,12 @@ class RedisDict(object):
         if len(keys) == 0:
             return {}
         to_rm = len(self.namespace)
-        return dict(zip([i[to_rm:] for i in keys],
-                        [self._decode(item) for item in self.redis.mget(keys)]))
+        return dict(
+            zip(
+                [i[to_rm:] for i in keys],
+                [self._decode(item) for item in self.redis.mget(keys)],
+            )
+        )
 
     def multi_del(self, key):
         keys = self._keys(key)
@@ -151,7 +155,6 @@ class RedisDict(object):
 
 
 class RedisListIterator(object):
-
     def __init__(self, redis_instance, key, start=0, end=-1):
         # type: (StrictRedis, str, int, int) -> None
         """Creates a redis list iterator.
@@ -284,7 +287,7 @@ if __name__ == '__main__':
 
     assert len(dd) == 1
 
-    del(dd['one_item'])
+    del (dd['one_item'])
     assert len(dd) == 0
 
     print('all is well')
