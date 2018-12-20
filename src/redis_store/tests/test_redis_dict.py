@@ -406,4 +406,3 @@ def test_clear_dict_clears_all_key_values(db):
     db.r.clear()
 
     assert len(db.r) == 0
-
