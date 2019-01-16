@@ -61,7 +61,9 @@ class ConfigManager(ConfigBase):
             self._SAVE_PARAM_SRV_NAME, SaveDeleteParam, self._saveparam_srv_cb
         )
         self._deleteparam_srv = rospy.Service(
-            self._DELETE_PARAM_SRV_NAME, SaveDeleteParam, self._deleteparam_srv_cb
+            self._DELETE_PARAM_SRV_NAME,
+            SaveDeleteParam,
+            self._deleteparam_srv_cb,
         )
         self._resetparams_srv = rospy.Service(
             self._RESET_PARAMS_SRV_NAME, ResetParams, self._resetparams_srv_cb
@@ -79,7 +81,10 @@ class ConfigManager(ConfigBase):
         self._defaults = {}
         self._defaults_source = {}
         self._local = RedisDict(
-            namespace=redis_namespace, host=redis_host, port=redis_port, db=redis_db
+            namespace=redis_namespace,
+            host=redis_host,
+            port=redis_port,
+            db=redis_db,
         )
 
         try:
@@ -97,7 +102,9 @@ class ConfigManager(ConfigBase):
             if len(path) == 0:
                 raise KeyError()
         except KeyError:
-            rospy.loginfo("Default parameters path not supplied, assuming none.")
+            rospy.loginfo(
+                "Default parameters path not supplied, assuming none."
+            )
             return
 
         if path.startswith("pkg://"):
@@ -119,7 +126,9 @@ class ConfigManager(ConfigBase):
         try:
             files = os.listdir(path)
         except OSError:
-            rospy.logerr("Can't list defaults directory %s. Check permissions." % path)
+            rospy.logerr(
+                "Can't list defaults directory %s. Check permissions." % path
+            )
             sys.exit(1)
         defaults = []  # a list of 3-tuples, (param, val, originating_filename)
 

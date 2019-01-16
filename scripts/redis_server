@@ -53,7 +53,9 @@ class RedisServer(object):
             self._redis_config = rospy.get_param('~config')
 
         rospy.loginfo(
-            'Redis server address: {}:{}'.format(self._redis_host, self._redis_port)
+            'Redis server address: {}:{}'.format(
+                self._redis_host, self._redis_port
+            )
         )
         rospy.loginfo('Redis config: {}'.format(self._redis_config))
 
@@ -72,7 +74,9 @@ class RedisServer(object):
             default_port = random.randrange(min_port, max_port)
             count += 1
             if count > MAX_RETRIES:
-                rospy.logerr("Can't find a free port to run the test server on.")
+                rospy.logerr(
+                    "Can't find a free port to run the test server on."
+                )
                 sys.exit(1)
         return default_port
 
@@ -84,7 +88,9 @@ class RedisServer(object):
         except subprocess.CalledProcessError:
             rospy.logerr('Can\'t find Redis server executable.')
             sys.exit(1)
-        rospy.loginfo('Found Redis server version {}'.format(self._redis_version))
+        rospy.loginfo(
+            'Found Redis server version {}'.format(self._redis_version)
+        )
 
     def _on_node_shutdown(self):
         rospy.loginfo('Shutting down Redis server')
@@ -119,7 +125,9 @@ class RedisServer(object):
                     rospy.logerr(stdout.strip())
                 else:
                     rospy.loginfo(stdout.strip())
-                if stdout.find('The server is now ready to accept connections on port'):
+                if stdout.find(
+                    'The server is now ready to accept connections on port'
+                ):
                     self._ready = True
 
         if not rospy.is_shutdown():
