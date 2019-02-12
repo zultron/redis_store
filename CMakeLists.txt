@@ -84,6 +84,17 @@ install(
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Install launch files
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+
+# Install config files
+install(FILES
+  config/redis.conf
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
+  )
+
 #############
 ## Testing ##
 #############
