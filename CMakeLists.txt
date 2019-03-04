@@ -101,6 +101,5 @@ install(FILES
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   find_package(ros_pytest REQUIRED)
-  #add_rostest(tests/integration_tests.launch)
-  #add_rostest(tests/lib_test.launch)
+  add_rostest(tests/redis_store.test)
 endif()
