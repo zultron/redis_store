@@ -11,7 +11,7 @@ import collections
 import json
 import six
 
-from redis_store.srv import (
+from redis_store_msgs.srv import (
     GetParam,
     SetParam,
     SaveDeleteParam,

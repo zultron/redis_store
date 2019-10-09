@@ -1,6 +1,0 @@
-# sets a parameter in the local store and rosparam
-
-string param_name
-string param_value
----
-bool success

@@ -1,5 +1,0 @@
-# saves or deletes a parameter from the local store and rosparam
-
-string param_name
----
-bool success

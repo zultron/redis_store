@@ -4,7 +4,12 @@ import json
 import rospy
 
 from std_msgs.msg import String
-from redis_store.srv import GetParam, SetParam, SaveDeleteParam, ResetParams
+from redis_store_msgs.srv import (
+    GetParam,
+    SetParam,
+    SaveDeleteParam,
+    ResetParams,
+)
 
 
 class ConfigBase(object):
