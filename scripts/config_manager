@@ -11,6 +11,7 @@ import collections
 import json
 import six
 
+from redis_store_msgs.msg import ParamUpdate
 from redis_store_msgs.srv import (
     GetParam,
     SetParam,
@@ -69,7 +70,7 @@ class ConfigManager(ConfigBase):
             self._RESET_PARAMS_SRV_NAME, ResetParams, self._resetparams_srv_cb
         )
         self._update_pub = rospy.Publisher(
-            self._UPDATE_TOPIC_NAME, String, queue_size=10
+            self._UPDATE_TOPIC_NAME, ParamUpdate, queue_size=10
         )
 
     def _create_dbs(self):
@@ -184,17 +185,21 @@ class ConfigManager(ConfigBase):
                 'name: {}, value: {}, filename: {}'.format(name, val, filename)
             )
 
+    def _get_param(self, name):
+        value = self._local.get(name)
+        if value is None:
+            value = self._defaults.get(name)
+        if value is None:
+            value = rospy.get_param(name, None)
+        return value
+
     def _getparam_srv_cb(self, req):
         """
         Could just use the ros parameter server to get the params
         but one day might not back onto the parameter server...
         """
         response = GetParamResponse()
-        value = self._local.get(req.param_name)
-        if value is None:
-            value = self._defaults.get(req.param_name)
-        if value is None:
-            value = rospy.get_param(req.param_name, None)
+        value = self._get_param(req.param_name)
         if value is None:
             response.success = False
             return response
@@ -213,7 +218,7 @@ class ConfigManager(ConfigBase):
             return SetParamResponse(False)
         self._local[req.param_name] = value
         rospy.set_param(req.param_name, value)
-        self._update_pub.publish(req.param_name)
+        self._update_pub.publish(ParamUpdate(req.param_name, req.param_value))
         return SetParamResponse(True)
 
     def _saveparam_srv_cb(self, req):
@@ -240,7 +245,7 @@ class ConfigManager(ConfigBase):
         if req.param_name in self._local:
             del self._local[req.param_name]
 
-        self._update_pub.publish(req.param_name)
+        self._update_pub.publish(ParamUpdate(req.param_name, ""))
 
         return SaveDeleteParamResponse(True)
 
@@ -255,7 +260,8 @@ class ConfigManager(ConfigBase):
         self._load_settings_into_rosparam()
 
         for name in set(self._defaults.keys() + local_names):
-            self._update_pub.publish(name)
+            value = self._get_param(name)
+            self._update_pub.publish(ParamUpdate(name, value))
 
         return ResetParamsResponse(True)
 

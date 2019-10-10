@@ -3,7 +3,7 @@ import json
 
 import rospy
 
-from std_msgs.msg import String
+from redis_store_msgs.msg import ParamUpdate
 from redis_store_msgs.srv import (
     GetParam,
     SetParam,
@@ -25,7 +25,7 @@ class ConfigClient(ConfigBase):
     def __init__(self, subscribe=False):
         if subscribe:
             self._update_sub = rospy.Subscriber(
-                self._UPDATE_TOPIC_NAME, String, self._update_received
+                self._UPDATE_TOPIC_NAME, ParamUpdate, self._update_received
             )
         else:
             self._update_sub = None
@@ -71,5 +71,6 @@ class ConfigClient(ConfigBase):
             self._update_sub.unregister()
 
     def _update_received(self, msg):
+        decoded_value = json.loads(msg.param_value)
         for cb in self.on_update_received:
-            cb(msg.data)
+            cb(msg.param_name, decoded_value)
