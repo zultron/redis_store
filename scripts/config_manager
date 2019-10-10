@@ -208,7 +208,7 @@ class ConfigManager(ConfigBase):
         """
         try:
             value = json.loads(req.param_value)
-        except TypeError:
+        except ValueError:
             rospy.logerr('New parameter value must be JSON encoded')
             return SetParamResponse(False)
         self._local[req.param_name] = value
