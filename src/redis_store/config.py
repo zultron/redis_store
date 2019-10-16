@@ -71,6 +71,9 @@ class ConfigClient(ConfigBase):
             self._update_sub.unregister()
 
     def _update_received(self, msg):
-        decoded_value = json.loads(msg.param_value)
+        try:
+            decoded_value = json.loads(msg.param_value)
+        except ValueError:
+            decoded_value = None
         for cb in self.on_update_received:
             cb(msg.param_name, decoded_value)
