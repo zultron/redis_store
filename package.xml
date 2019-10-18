@@ -3,7 +3,8 @@
   <name>redis_store</name>
   <version>0.1.0</version>
   <description>
-     A package to support Redis storage for data from and to ROS.
+    redis_store wraps up the redis datastructure store in ROS, allowing
+    it to be used to store configuration parameters.
   </description>
   <maintainer email="alexander@roessler.systems">Alexander Rössler</maintainer>
   <license>TODO</license>
@@ -15,11 +16,11 @@
 
   <depend>rospy</depend>
   <depend>python-future</depend>
-  <depend>std_msgs</depend>
   <depend>python-redis</depend>
   <depend>redis-server</depend>
   <depend>redis_store_msgs</depend>
 
+  <test_depend>rostest</test_depend>
   <test_depend>ros_pytest</test_depend>
   <test_depend>python-pytest-dependency-pip</test_depend>
 

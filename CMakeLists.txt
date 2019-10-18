@@ -7,14 +7,10 @@ project(redis_store)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  redis_store_msgs
-  rospy
-)
+find_package(catkin REQUIRED COMPONENTS ${PROJECT_NAME}_msgs rospy)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -31,10 +27,10 @@ catkin_python_setup()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES ros_pytest
-#  CATKIN_DEPENDS pyros python-pytest
-#  DEPENDS system_lib
+  #  INCLUDE_DIRS include
+  #  LIBRARIES ros_pytest
+  CATKIN_DEPENDS ${PROJECT_NAME}_msgs
+  #  DEPENDS system_lib
 )
 
 ###########
@@ -43,10 +39,8 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
-# include
-  ${catkin_INCLUDE_DIRS}
-)
+include_directories(# include
+                    ${catkin_INCLUDE_DIRS})
 
 #############
 ## Install ##
@@ -60,19 +54,14 @@ include_directories(
 install(
   DIRECTORY scripts/
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  USE_SOURCE_PERMISSIONS
-)
+  USE_SOURCE_PERMISSIONS)
 
 # Install launch files
-install(DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
+install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # Install config files
-install(FILES
-  config/redis.conf
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
-  )
+install(FILES config/redis.conf
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config)
 
 #############
 ## Testing ##
@@ -81,5 +70,5 @@ install(FILES
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   find_package(ros_pytest REQUIRED)
-  add_rostest(tests/redis_store.test)
+  add_rostest(tests/${PROJECT_NAME}.test)
 endif()
