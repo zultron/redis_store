@@ -70,5 +70,5 @@ install(FILES config/redis.conf
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   find_package(ros_pytest REQUIRED)
-  add_rostest(tests/${PROJECT_NAME}.test)
+  add_rostest(tests/integration_tests.launch)
 endif()
