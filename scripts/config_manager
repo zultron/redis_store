@@ -261,7 +261,7 @@ class ConfigManager(ConfigBase):
 
         for name in set(self._defaults.keys() + local_names):
             value = self._get_param(name)
-            self._update_pub.publish(ParamUpdate(name, value))
+            self._update_pub.publish(ParamUpdate(name, json.dumps(value)))
 
         return ResetParamsResponse(True)
 
