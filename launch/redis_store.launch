@@ -19,7 +19,7 @@
     <!-- launch in test mode -->
     <group if="$(arg test_mode)">
       <node name="redis_server" pkg="redis_store" type="redis_server">
-  	<param name="test_mode" value="$(arg test_mode)"/>
+        <param name="test_mode" value="$(arg test_mode)"/>
       </node>
     </group>
     <!-- launch in non-test, i.e. normal, mode -->
