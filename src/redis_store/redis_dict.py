@@ -64,7 +64,7 @@ class RedisDict(object):
         return self.__repr__()
 
     def __len__(self):
-        return len(self._keys())
+        return sum(1 for _ in self._keys())
 
     @staticmethod
     def _encode(data):
@@ -75,10 +75,10 @@ class RedisDict(object):
         return json.loads(data)
 
     def _scan_keys(self, search_term=''):
-        return self.redis.scan(match=self.namespace + search_term + '*')
+        return self.redis.scan_iter(match=self.namespace + search_term + '*')
 
     def _keys(self, search_term=''):
-        return self._scan_keys(search_term)[1]
+        return self._scan_keys(search_term)
 
     def keys(self):
         to_rm = len(self.namespace)
@@ -119,7 +119,7 @@ class RedisDict(object):
             raise StopIteration
 
     def multi_get(self, key):
-        found_keys = self._keys(key)
+        found_keys = list(self._keys(key))
         if len(found_keys) == 0:
             return []
 
@@ -129,7 +129,7 @@ class RedisDict(object):
         return self.multi_get(':'.join(keys))
 
     def multi_dict(self, key):
-        keys = self._keys(key)
+        keys = list(self._keys(key))
         if len(keys) == 0:
             return {}
         to_rm = len(self.namespace)
@@ -141,7 +141,7 @@ class RedisDict(object):
         )
 
     def multi_del(self, key):
-        keys = self._keys(key)
+        keys = list(self._keys(key))
         if len(keys) == 0:
             return 0
         return self.redis.delete(*keys)
@@ -287,7 +287,7 @@ if __name__ == '__main__':
 
     assert len(dd) == 1
 
-    del (dd['one_item'])
+    del dd['one_item']
     assert len(dd) == 0
 
     print('all is well')

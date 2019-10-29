@@ -48,6 +48,15 @@ def test_keys_empty(db):
     assert keys == []
 
 
+def test_many_keys(db):
+    for i in range(100):
+        db.r['foo{}'.format(i)] = str(i)
+
+    keys = db.r.keys()
+
+    assert len(keys) == 100
+
+
 def test_set_namespace(db):
     """Test that RedisDict keys are inserted with the given namespace."""
     db.r['foo'] = 'bar'
