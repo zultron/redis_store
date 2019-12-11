@@ -9,7 +9,7 @@ from redis_store.redis_dict import RedisDict
 # !! Make sure you don't have keys named like this, they will be deleted.
 TEST_NAMESPACE_PREFIX = 'test_rd'
 
-redis_config = {'host': 'localhost', 'port': 6379, 'db': 0}
+redis_config = {'host': 'localhost', 'port': 61245, 'db': 0}
 
 
 def encode_data(data):
