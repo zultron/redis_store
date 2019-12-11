@@ -43,6 +43,9 @@ class ConfigClient(ConfigBase):
 
         self.on_update_received = []
 
+    def wait_for_service(self, timeout=None):
+        self._get_param.wait_for_service(timeout)
+
     def get_param(self, name):
         response = self._get_param(name)
         decoded = None
