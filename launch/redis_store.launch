@@ -28,8 +28,7 @@
       <param name="redis_config" value="$(arg config)" />
       <param name="redis_host" value="$(optenv ROS_HOSTNAME localhost)" />
 
-      <node name="redis_server" pkg="redis_store" type="redis_server">
-      </node>
+      <node name="redis_server" pkg="redis_store" type="redis_server"/>
     </group>
   </group>
 
