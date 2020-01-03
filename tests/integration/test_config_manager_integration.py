@@ -76,6 +76,24 @@ def test_set_param_service_updates_redis_db(node, client, redis):
     assert redis['euclases'] == 'LR1WJO'
 
 
+@pytest.mark.dependency(
+    depends=[
+        'test_set_param_service_updates_ros_parameter',
+        'test_set_param_service_updates_redis_db',
+    ]
+)
+def test_param_name_is_normalized_correctly(node, client, redis):
+    client.set_param('/reduce', 16)
+    client.set_param('fierce/expense/', "mad")
+
+    assert redis['reduce'] == 16
+    assert client.get_param('reduce') == 16
+    assert client.get_param('/reduce') == 16
+    assert redis['fierce/expense'] == "mad"
+    assert client.get_param('fierce/expense') == "mad"
+    assert client.get_param('fierce/expense/') == "mad"
+
+
 def test_save_param_stores_ros_param_into_redis_db(node, client, redis):
     rospy.set_param('wrabbe', 908)
 
@@ -120,8 +138,8 @@ def test_reset_params_resets_params_back_to_default(node, client, redis):
     success = client.reset_params()
 
     assert success is True
-    assert rospy.get_param('/foo/bar') == 'something'
-    assert redis.get('/foo/bar', None) is None
+    assert rospy.get_param('foo/bar') == 'something'
+    assert redis.get('foo/bar', None) is None
 
 
 @pytest.mark.dependency(
