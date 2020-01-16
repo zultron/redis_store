@@ -22,7 +22,6 @@ from redis_store_msgs.srv import (
     SaveDeleteParamResponse,
     ResetParamsResponse,
 )
-from std_msgs.msg import String
 from redis_store import RedisDict
 from redis_store.config import ConfigBase
 import rosparam
