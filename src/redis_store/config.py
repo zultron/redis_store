@@ -74,12 +74,12 @@ class ConfigClient(ConfigBase):
         response = self._delete_param(name)
         return response.success
 
-    def import_param(self, name, file_name):
-        response = self._import_param(name, file_name)
+    def import_param(self, name, file_path):
+        response = self._import_param(name, file_path)
         return response.success
 
-    def export_param(self, name, file_name):
-        response = self._export_param(name, file_name)
+    def export_param(self, name, file_path):
+        response = self._export_param(name, file_path)
         return response.success
 
     def reset_params(self):
