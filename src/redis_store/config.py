@@ -8,6 +8,7 @@ from redis_store_msgs.srv import (
     GetParam,
     SetParam,
     SaveDeleteParam,
+    ImportExportParam,
     ResetParams,
 )
 
@@ -18,6 +19,8 @@ class ConfigBase(object):
     _SAVE_PARAM_SRV_NAME = 'config_manager/save_param'
     _DELETE_PARAM_SRV_NAME = 'config_manager/delete_param'
     _RESET_PARAMS_SRV_NAME = 'config_manager/reset_params'
+    _IMPORT_PARAM_SRV_NAME = 'config_manager/import_param'
+    _EXPORT_PARAM_SRV_NAME = 'config_manager/export_param'
     _UPDATE_TOPIC_NAME = 'config_manager/update'
 
 
@@ -36,6 +39,12 @@ class ConfigClient(ConfigBase):
         )
         self._delete_param = rospy.ServiceProxy(
             self._DELETE_PARAM_SRV_NAME, SaveDeleteParam
+        )
+        self._import_param = rospy.ServiceProxy(
+            self._IMPORT_PARAM_SRV_NAME, ImportExportParam
+        )
+        self._export_param = rospy.ServiceProxy(
+            self._EXPORT_PARAM_SRV_NAME, ImportExportParam
         )
         self._reset_params = rospy.ServiceProxy(
             self._RESET_PARAMS_SRV_NAME, ResetParams
@@ -63,6 +72,14 @@ class ConfigClient(ConfigBase):
 
     def delete_param(self, name):
         response = self._delete_param(name)
+        return response.success
+
+    def import_param(self, name, file_name):
+        response = self._import_param(name, file_name)
+        return response.success
+
+    def export_param(self, name, file_name):
+        response = self._export_param(name, file_name)
         return response.success
 
     def reset_params(self):

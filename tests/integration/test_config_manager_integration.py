@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+
 import pytest
 import rospy
 
@@ -24,6 +26,17 @@ def redis():
     return RedisDict(
         namespace=redis_namespace, host=redis_host, port=redis_port, db=redis_db
     )
+
+
+@pytest.fixture
+def data_file(tmpdir):
+    f = tmpdir.join('stiffen.json')
+    f.write(
+        '''\
+{"sharpen": "miss"}
+'''
+    )
+    return str(f)
 
 
 @pytest.mark.dependency()
@@ -74,6 +87,34 @@ def test_set_param_service_updates_redis_db(node, client, redis):
 
     assert success is True
     assert redis['euclases'] == 'LR1WJO'
+
+
+@pytest.mark.dependency()
+def test_import_param_service_updates_ros_parameter(node, client, data_file):
+    success = client.import_param('hurt', data_file)
+
+    assert success is True
+    assert rospy.get_param('hurt') == dict(sharpen="miss")
+
+
+@pytest.mark.dependency()
+def test_import_param_service_update_redis_db(node, client, redis, data_file):
+    success = client.import_param('narrow', data_file)
+
+    assert success is True
+    assert redis['narrow'] == dict(sharpen="miss")
+
+
+def test_export_param_service_exports_data_to_file(node, client, data_file):
+    rospy.set_param('tray', ["degree", "favorite", "rapid", "pad", "rake"])
+
+    success = client.export_param('tray', data_file)
+
+    assert success is True
+    assert os.path.exists(data_file)
+    with open(data_file, 'rt') as f:
+        data = f.read()
+    assert data == '["degree", "favorite", "rapid", "pad", "rake"]'
 
 
 @pytest.mark.dependency(

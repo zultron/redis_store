@@ -16,10 +16,12 @@ from redis_store_msgs.srv import (
     GetParam,
     SetParam,
     SaveDeleteParam,
+    ImportExportParam,
     ResetParams,
     GetParamResponse,
     SetParamResponse,
     SaveDeleteParamResponse,
+    ImportExportParamResponse,
     ResetParamsResponse,
 )
 from redis_store import RedisDict
@@ -92,6 +94,16 @@ class ConfigManager(ConfigBase):
             self._DELETE_PARAM_SRV_NAME,
             SaveDeleteParam,
             self._deleteparam_srv_cb,
+        )
+        self._importparam_srv = rospy.Service(
+            self._IMPORT_PARAM_SRV_NAME,
+            ImportExportParam,
+            self._importparam_srv_cb,
+        )
+        self._exportparam_srv = rospy.Service(
+            self._EXPORT_PARAM_SRV_NAME,
+            ImportExportParam,
+            self._exportparam_srv_cb,
         )
         self._resetparams_srv = rospy.Service(
             self._RESET_PARAMS_SRV_NAME, ResetParams, self._resetparams_srv_cb
@@ -309,6 +321,45 @@ class ConfigManager(ConfigBase):
             self._update_pub.publish(ParamUpdate(param_name, ""))
 
         return SaveDeleteParamResponse(deleted)
+
+    def _importparam_srv_cb(self, req):
+        """
+        Imports the value from data stored in a JSON file to the rosparam and the local value store.
+        """
+        try:
+            with open(req.file_path, 'rt') as f:
+                value = json.load(f)
+        except ValueError:
+            rospy.logerr("New parameter value must be JSON encoded")
+            return ImportExportParamResponse(False)
+        except (IOError, OSError) as e:
+            rospy.logerr("Error reading file {}: {}".format(req.file_path, e))
+            return ImportExportParamResponse(False)
+        param_name = self._normalize_key(req.param_name)
+        rospy.logdebug("Import and set param {} to {}.".format(param_name, value))
+        self._local[param_name] = value
+        rospy.set_param(param_name, value)
+        param_value = json.dumps(value)
+        self._update_pub.publish(ParamUpdate(param_name, param_value))
+        return ImportExportParamResponse(True)
+
+    def _exportparam_srv_cb(self, req):
+        """
+        Exports the value to a JSON file.
+        """
+        param_name = self._normalize_key(req.param_name)
+        value = self._get_param(param_name)
+        if value is None:
+            rospy.logdebug("Could not find param {}".format(param_name))
+            return ImportExportParamResponse(False)
+        rospy.logdebug("Export param {} with value {}.".format(param_name, value))
+        try:
+            with open(req.file_path, 'wt') as f:
+                json.dump(value, f)
+        except (IOError, OSError) as e:
+            rospy.logerr("Error writing file {}: {}".format(req.file_path, e))
+            return ImportExportParamResponse(False)
+        return ImportExportParamResponse(True)
 
     def _resetparams_srv_cb(self, _req):
         """
