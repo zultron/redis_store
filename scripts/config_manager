@@ -234,6 +234,23 @@ class ConfigManager(ConfigBase):
         else:
             return key
 
+    @staticmethod
+    def _split_data(key, data):
+        def recurse_dict(key_, data_, values_):
+            for k, d in data_.items():
+                new_key = key_ + '/' + k
+                if isinstance(d, dict):
+                    recurse_dict(new_key, d, values_)
+                else:
+                    values_.append((new_key, d))
+
+        if isinstance(data, dict):
+            values = []
+            recurse_dict(key, data, values)
+            return values
+        else:
+            return [(key, data)]
+
     def _get_param(self, name):
         value = rospy.get_param(name, None)
         if value is None:
@@ -241,6 +258,17 @@ class ConfigManager(ConfigBase):
         if value is None:
             value = self._defaults.get(name)
         return value
+
+    def _set_local_param(self, param_name, data):
+        # split up keys
+        values = self._split_data(param_name, data)
+        # delete any local sub keys
+        for key in list(self._local.keys()):
+            if key.startswith(param_name):
+                del self._local[key]
+        # update with new values
+        for key, value in values:
+            self._local[key] = value
 
     def _getparam_srv_cb(self, req):
         """
@@ -268,14 +296,15 @@ class ConfigManager(ConfigBase):
         Set the local site-specific parameter.
         """
         try:
-            value = json.loads(req.param_value)
+            data = json.loads(req.param_value)
         except ValueError:
             rospy.logerr('New parameter value must be JSON encoded')
             return SetParamResponse(False)
+
         param_name = self._normalize_key(req.param_name)
-        rospy.logdebug("Set param {} to {}.".format(param_name, value))
-        self._local[param_name] = value
-        rospy.set_param(param_name, value)
+        rospy.logdebug("Set param {} to {}.".format(param_name, data))
+        self._set_local_param(param_name, data)
+        rospy.set_param(param_name, data)
         self._update_pub.publish(ParamUpdate(param_name, req.param_value))
         return SetParamResponse(True)
 
@@ -290,11 +319,11 @@ class ConfigManager(ConfigBase):
             return SaveDeleteParamResponse(False)
 
         param_name = self._normalize_key(req.param_name)
-        value = rospy.get_param(param_name)
+        data = rospy.get_param(param_name)
         rospy.logdebug(
-            "Saving param {} with value {} to db.".format(param_name, value)
+            "Saving param {} with value {} to db.".format(param_name, data)
         )
-        self._local[param_name] = value
+        self._set_local_param(param_name, data)
         return SaveDeleteParamResponse(True)
 
     def _deleteparam_srv_cb(self, req):
@@ -310,12 +339,14 @@ class ConfigManager(ConfigBase):
             rospy.delete_param(param_name)
             deleted = True
 
-        if param_name in self._local:
-            rospy.logdebug(
-                "Deleting param {} from local db.".format(param_name)
-            )
-            del self._local[param_name]
-            deleted = True
+        for key in list(self._local.keys()):
+            if key.startswith(param_name):
+                if not deleted:
+                    rospy.logdebug(
+                        "Deleting param {} from local db.".format(param_name)
+                    )
+                    deleted = True
+                del self._local[key]
 
         if deleted:
             self._update_pub.publish(ParamUpdate(param_name, ""))
@@ -328,7 +359,7 @@ class ConfigManager(ConfigBase):
         """
         try:
             with open(req.file_path, 'rt') as f:
-                value = json.load(f)
+                data = json.load(f)
         except ValueError:
             rospy.logerr("New parameter value must be JSON encoded")
             return ImportExportParamResponse(False)
@@ -336,10 +367,10 @@ class ConfigManager(ConfigBase):
             rospy.logerr("Error reading file {}: {}".format(req.file_path, e))
             return ImportExportParamResponse(False)
         param_name = self._normalize_key(req.param_name)
-        rospy.logdebug("Import and set param {} to {}.".format(param_name, value))
-        self._local[param_name] = value
-        rospy.set_param(param_name, value)
-        param_value = json.dumps(value)
+        rospy.logdebug("Import and set param {} to {}.".format(param_name, data))
+        self._set_local_param(param_name, data)
+        rospy.set_param(param_name, data)
+        param_value = json.dumps(data)
         self._update_pub.publish(ParamUpdate(param_name, param_value))
         return ImportExportParamResponse(True)
 

@@ -90,6 +90,28 @@ def test_set_param_service_updates_redis_db(node, client, redis):
 
 
 @pytest.mark.dependency()
+def test_set_param_service_overwrites_sub_keys_in_ros_param(node, client):
+    rospy.set_param('angry/over', "47j")
+
+    success = client.set_param('angry', {"over": "Lns3Br3"})
+
+    assert success is True
+    assert rospy.get_param('angry') == {"over": "Lns3Br3"}
+    assert rospy.get_param('angry/over') == "Lns3Br3"
+
+
+@pytest.mark.dependency()
+def test_set_param_service_cleans_up_sub_keys_in_redis_db(node, client, redis):
+    redis['angry/over'] = "47j"
+
+    success = client.set_param('angry', {"over": "Lns3Br3"})
+
+    assert success is True
+    assert 'angry' not in redis
+    assert redis['angry/over'] == "Lns3Br3"
+
+
+@pytest.mark.dependency()
 def test_import_param_service_updates_ros_parameter(node, client, data_file):
     success = client.import_param('hurt', data_file)
 
@@ -102,7 +124,37 @@ def test_import_param_service_update_redis_db(node, client, redis, data_file):
     success = client.import_param('narrow', data_file)
 
     assert success is True
-    assert redis['narrow'] == dict(sharpen="miss")
+    assert redis['narrow/sharpen'] == "miss"
+
+
+@pytest.mark.dependency()
+def test_import_param_service_cleans_up_sub_keys_in_ros_param(
+    node, client, data_file
+):
+    rospy.set_param('someone', dict(sharpen="miss"))
+    rospy.set_param('someone/strip', 365)
+
+    success = client.import_param('someone', data_file)
+
+    assert success is True
+    assert rospy.get_param('someone', None) == dict(sharpen="miss")
+    assert rospy.get_param('someone/sharpen', None) == "miss"
+    assert rospy.get_param('someone/strip', None) is None
+
+
+@pytest.mark.dependency()
+def test_import_param_service_cleans_up_sub_keys_in_redis_db(
+    node, client, redis, data_file
+):
+    redis['someone/sharpen'] = "applaud"
+    redis['someone/strip'] = 365
+
+    success = client.import_param('someone', data_file)
+
+    assert success is True
+    assert 'someone' not in redis
+    assert 'someone/strip' not in redis
+    assert redis['someone/sharpen'] == "miss"
 
 
 def test_export_param_service_exports_data_to_file(node, client, data_file):
@@ -144,6 +196,17 @@ def test_save_param_stores_ros_param_into_redis_db(node, client, redis):
     assert redis['wrabbe'] == 908
 
 
+def test_save_param_stores_sub_keys_into_redis_db(node, client, redis):
+    rospy.set_param('insult', {"snow": "1xN", "night": 246})
+
+    success = client.save_param('insult')
+
+    assert success is True
+    assert 'insult' not in redis
+    assert redis['insult/snow'] == "1xN"
+    assert redis['insult/night'] == 246
+
+
 def test_save_param_fails_when_ros_param_does_not_exist(node, client, redis):
     success = client.save_param('bullpout')
 
@@ -164,6 +227,28 @@ def test_delete_param_removes_ros_param_and_redis_entry(node, client, redis):
     assert success is True
     assert rospy.get_param('severe', None) is None
     assert redis.get('severe', None) is None
+
+
+@pytest.mark.dependency(
+    depends=[
+        'test_set_param_service_overwrites_sub_keys_in_ros_param',
+        'test_set_param_service_cleans_up_sub_keys_in_redis_db',
+    ]
+)
+def test_delete_param_removes_subkey_from_ros_param_and_redis(
+    node, client, redis
+):
+    client.set_param('bread', {"spit": "5qvgNvf", "sick": 335})
+
+    success = client.delete_param('bread')
+
+    assert success is True
+    assert rospy.get_param('bread', None) is None
+    assert rospy.get_param('bread/spit', None) is None
+    assert rospy.get_param('bread/sick', None) is None
+    assert redis.get('bread', None) is None
+    assert redis.get('bread/spit', None) is None
+    assert redis.get('bread/sick', None) is None
 
 
 @pytest.mark.dependency(

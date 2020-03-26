@@ -1,5 +1,4 @@
 <launch>
-
   <include file="$(find redis_store)/launch/redis_store.launch">
     <arg name="test_mode" value="true"/>
     <arg name="defaults_path" value="$(find redis_store)/tests/integration/config"/>
