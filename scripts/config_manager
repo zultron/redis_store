@@ -235,11 +235,11 @@ class ConfigManager(ConfigBase):
             return key
 
     def _get_param(self, name):
-        value = self._local.get(name)
+        value = rospy.get_param(name, None)
+        if value is None:
+            value = self._local.get(name)
         if value is None:
             value = self._defaults.get(name)
-        if value is None:
-            value = rospy.get_param(name, None)
         return value
 
     def _getparam_srv_cb(self, req):
