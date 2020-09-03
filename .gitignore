@@ -8,3 +8,6 @@
 
 # Linux
 .directory
+
+# bloom
+/debian/
