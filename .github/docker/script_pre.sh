@@ -30,6 +30,9 @@ cat > /etc/ros/rosdep/machinekit-rosdep.yaml <<EOF
 redis_store_msgs:
   debian: [ros-$ROS_DISTRO-redis-store-msgs]
   ubuntu: [ros-$ROS_DISTRO-redis-store-msgs]
+python3-redis:
+  debian: [python3-redis]
+  ubuntu: [python3-redis]
 EOF
 cat > /etc/ros/rosdep/sources.list.d/10-local.list <<EOF
 yaml file:///etc/ros/rosdep/machinekit-rosdep.yaml

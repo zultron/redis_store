@@ -15,14 +15,16 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>rospy</depend>
-  <depend>python-future</depend>
-  <depend>python-redis</depend>
+  <depend>python3-redis</depend>
   <depend>redis-server</depend>
   <depend>redis_store_msgs</depend>
 
   <test_depend>rostest</test_depend>
   <test_depend>ros_pytest</test_depend>
-  <test_depend>python-pytest-dependency-pip</test_depend>
+  <!-- rosdep resolves this as `pytest-dependency`, which is a valid
+       pip package, but for some reason adds it to the
+       `debian/control` `Build-Depends:`.  -->
+  <!-- <test_depend>python-pytest-dependency-pip</test_depend> -->
 
   <export>
       <rosdoc config="${prefix}/rosdoc.yaml"/>
