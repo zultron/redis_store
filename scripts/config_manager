@@ -175,7 +175,7 @@ class ConfigManager(ConfigBase):
         def flatten(d, c="", f_name=""):
             lst = []
             for k, v in six.iteritems(d):
-                if isinstance(v, collections.Mapping):
+                if isinstance(v, collections.abc.Mapping):
                     lst.extend(flatten(v, c + "/" + k, f_name))
                 else:
                     lst.append((c + "/" + k, v, f_name))
