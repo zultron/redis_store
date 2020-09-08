@@ -29,15 +29,11 @@ class RedisServer(object):
 
         self.test_mode = rospy.get_param("~test_mode", False)
 
+        default_host = 'localhost'
         if self.test_mode:
-            default_host = 'localhost'
             default_port = self._find_free_port(default_host, 49152, 65535)
-            default_config = ''
         else:
-            default_host = 'localhost'
             default_port = 6379
-            default_config = ''
-
         is_master = rospy.get_param('~master', True)
 
         if is_master:
@@ -45,6 +41,7 @@ class RedisServer(object):
             rospy.set_param('redis_host', self._redis_host)
             self._redis_port = rospy.get_param('redis_port', default_port)
             rospy.set_param('redis_port', self._redis_port)
+            default_config = ''
             self._redis_config = rospy.get_param('redis_config', default_config)
             rospy.set_param('redis_config', self._redis_config)
         else:
@@ -111,7 +108,10 @@ class RedisServer(object):
         cmd += ['--port', str(self._redis_port)]
 
         self._redis_process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, preexec_fn=block_kill
+            cmd,
+            stdout=subprocess.PIPE,
+            preexec_fn=block_kill,
+            universal_newlines=True,
         )
         while self._redis_process.poll() is None:
             try:

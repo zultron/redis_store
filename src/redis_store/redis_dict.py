@@ -28,8 +28,7 @@ class RedisDict(object):
         return self.redis.get(k)
 
     def _get_item(self, k):
-        result = self._raw_get_item(self.namespace + k)
-        return result
+        return self._raw_get_item(self.namespace + k)
 
     def __getitem__(self, k):
         result = self._get_item(k)
@@ -45,10 +44,7 @@ class RedisDict(object):
             return default
 
     def __setitem__(self, k, v):
-        if v is None:
-            v = self.sentinel_none
-        else:
-            v = self._encode(v)
+        v = self.sentinel_none if v is None else self._encode(v)
         self.redis.set(self.namespace + k, v, ex=self.expire)
 
     def __delitem__(self, k):
@@ -120,7 +116,7 @@ class RedisDict(object):
 
     def multi_get(self, key):
         found_keys = list(self._keys(key))
-        if len(found_keys) == 0:
+        if not found_keys:
             return []
 
         return [self._decode(item) for item in self.redis.mget(found_keys)]
@@ -130,7 +126,7 @@ class RedisDict(object):
 
     def multi_dict(self, key):
         keys = list(self._keys(key))
-        if len(keys) == 0:
+        if not keys:
             return {}
         to_rm = len(self.namespace)
         return dict(
@@ -142,7 +138,7 @@ class RedisDict(object):
 
     def multi_del(self, key):
         keys = list(self._keys(key))
-        if len(keys) == 0:
+        if not keys:
             return 0
         return self.redis.delete(*keys)
 
@@ -159,10 +155,10 @@ class RedisListIterator(object):
         # type: (StrictRedis, str, int, int) -> None
         """Creates a redis list iterator.
 
-            :param redis_instance: instance of redis
-            :param key: redis list key
-            :param start: list slice start (inclusive)
-            :param end: list slice end (exclusive)
+        :param redis_instance: instance of redis
+        :param key: redis list key
+        :param start: list slice start (inclusive)
+        :param end: list slice end (exclusive)
 
         """
         self.position = start
