@@ -2,6 +2,11 @@
 Changelog for package redis_store
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.2 (2020-09-09)
+------------------
+* Fix noetic/Python 3
+* Contributors: Alexander Rössler
+
 0.1.1 (2020-09-03)
 ------------------
 * Add CI configuration
@@ -11,4 +16,3 @@ Changelog for package redis_store
 ------------------
 * Added CHANGELOG.rst to package
 * Contributors: Alexander Rössler
-
