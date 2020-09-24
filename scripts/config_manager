@@ -50,9 +50,7 @@ class ConfigManager(ConfigBase):
             val = self._local[name]
             old_name = name
             name = normalized_name
-            rospy.logwarn(
-                'Renaming legacy param {} to {}'.format(old_name, name)
-            )
+            rospy.logwarn(f"Renaming legacy param {old_name} to {name}")
             self._local[name] = val
             del self._local[old_name]
 
@@ -64,8 +62,7 @@ class ConfigManager(ConfigBase):
                 if subkey not in self._local or subkey in warned:
                     continue
                 rospy.logerr(
-                    'Partial key {} of {} in db. '
-                    'Please investigate.'.format(subkey, key)
+                    f"Partial key {subkey} of {key} in db. Please investigate."
                 )
                 warned.add(subkey)
 
@@ -73,10 +70,10 @@ class ConfigManager(ConfigBase):
         for name in self._defaults.keys():
             val = self._defaults[name]
             if name not in self._local:
-                rospy.logdebug("Setting param {} from defaults.".format(name))
+                rospy.logdebug(f"Setting param {name} from defaults.")
                 rospy.set_param(name, val)
         for name in list(self._local.keys()):
-            rospy.logdebug("Setting param {} from local db.".format(name))
+            rospy.logdebug(f"Setting param {name} from local db.")
             val = self._local[name]
             rospy.set_param(name, val)
 
@@ -131,9 +128,7 @@ class ConfigManager(ConfigBase):
             self._local.redis.ping()
         except redis.ConnectionError:
             rospy.logerr(
-                "Could not establish a connection to the Redis server {}:{}".format(
-                    redis_host, redis_port
-                )
+                f"Could not establish a connection to the Redis server {redis_host}:{redis_port}"
             )
             sys.exit(1)
 
@@ -142,9 +137,7 @@ class ConfigManager(ConfigBase):
             if len(path) == 0:
                 raise KeyError()
         except KeyError:
-            rospy.loginfo(
-                "Default parameters path not supplied, assuming none."
-            )
+            rospy.loginfo("Default parameters path not supplied, assuming none.")
             return
 
         if path.startswith("pkg://"):
@@ -156,19 +149,17 @@ class ConfigManager(ConfigBase):
                 path = os.path.join(roslib.packages.get_pkg_dir(pkg), pkg_dir)
             except roslib.packages.InvalidROSPkgException:
                 rospy.logerr(
-                    "Supplied defaults path '%s' cannot be found. \n" % path
-                    + "The ROS package '%s' could not be located." % pkg
+                    f"Supplied defaults path '{path}' cannot be found. \n"
+                    f"The ROS package '{pkg}' could not be located."
                 )
                 sys.exit(1)
         if not os.path.isdir(path):
-            rospy.logwarn("Defaults path '%s' does not exist." % path)
+            rospy.logwarn(f"Defaults path '{path}' does not exist.")
             sys.exit(1)
         try:
             files = os.listdir(path)
         except OSError:
-            rospy.logerr(
-                "Can't list defaults directory %s. Check permissions." % path
-            )
+            rospy.logerr(f"Can't list defaults directory {path}. Check permissions.")
             sys.exit(1)
         defaults = []  # a list of 3-tuples, (param, val, originating_filename)
 
@@ -185,7 +176,7 @@ class ConfigManager(ConfigBase):
             if not f.endswith(".yaml"):
                 continue
             params = rosparam.load_file(os.path.join(path, f))
-            rospy.loginfo("Found default parameter file %s" % f)
+            rospy.loginfo(f"Found default parameter file {f}")
             for p, n in params:
                 defaults.extend(flatten(p, c="", f_name=f))
 
@@ -195,13 +186,12 @@ class ConfigManager(ConfigBase):
             existing = self._defaults.get(param, None)
             existing_source = self._defaults_source.get(param, None)
             if (existing is None) or (existing_source is None):
-                rospy.loginfo("New default parameter for %s" % param)
+                rospy.loginfo(f"New default parameter for {param}")
                 self._defaults[param] = val
                 self._defaults_source[param] = filename
             elif existing_source != filename:
                 rospy.logerr(
-                    "Two defaults parameter files have the same key:\n%s and %s, key %s"
-                    % (existing_source, filename, param)
+                    f"Two defaults parameter files have the same key:\n{existing_source} and {filename}, key {param}"
                 )
                 # Delete the entry so that it can be fixed...
                 if param in self._defaults:
@@ -210,7 +200,7 @@ class ConfigManager(ConfigBase):
                     del self._defaults_source[param]
                 rospy.signal_shutdown("Default parameter set error")
             else:
-                rospy.loginfo("Updating stored default for %s" % param)
+                rospy.loginfo(f"Updating stored default for {param}")
                 self._defaults[param] = val
 
     def _list_params(self):
@@ -221,9 +211,7 @@ class ConfigManager(ConfigBase):
         for name in self._defaults.keys():
             val = self._defaults[name]
             filename = self._defaults_source[name]
-            rospy.loginfo(
-                'name: {}, value: {}, filename: {}'.format(name, val, filename)
-            )
+            rospy.loginfo(f"name: {name}, value: {val}, filename: {filename}")
 
     @staticmethod
     def _normalize_key(key):
@@ -279,16 +267,12 @@ class ConfigManager(ConfigBase):
         param_name = self._normalize_key(req.param_name)
         value = self._get_param(param_name)
         if value is None:
-            rospy.logdebug("Could not find param {}".format(param_name))
+            rospy.logdebug(f"Could not find param {param_name}")
             response.success = False
             return response
         response.success = True
         response.param_value = json.dumps(value)
-        rospy.logdebug(
-            "Get param {} with value {}".format(
-                param_name, response.param_value
-            )
-        )
+        rospy.logdebug(f"Get param {param_name} with value {response.param_value}")
         return response
 
     def _setparam_srv_cb(self, req):
@@ -302,7 +286,7 @@ class ConfigManager(ConfigBase):
             return SetParamResponse(False)
 
         param_name = self._normalize_key(req.param_name)
-        rospy.logdebug("Set param {} to {}.".format(param_name, data))
+        rospy.logdebug(f"Set param {param_name} to {data}.")
         self._set_local_param(param_name, data)
         rospy.set_param(param_name, data)
         self._update_pub.publish(ParamUpdate(param_name, req.param_value))
@@ -320,9 +304,7 @@ class ConfigManager(ConfigBase):
 
         param_name = self._normalize_key(req.param_name)
         data = rospy.get_param(param_name)
-        rospy.logdebug(
-            "Saving param {} with value {} to db.".format(param_name, data)
-        )
+        rospy.logdebug(f"Saving param {param_name} with value {data} to db.")
         self._set_local_param(param_name, data)
         return SaveDeleteParamResponse(True)
 
@@ -333,18 +315,14 @@ class ConfigManager(ConfigBase):
         param_name = self._normalize_key(req.param_name)
         deleted = False
         if rospy.has_param(param_name):
-            rospy.logdebug(
-                "Deleting param {} from param server.".format(param_name)
-            )
+            rospy.logdebug(f"Deleting param {param_name} from param server.")
             rospy.delete_param(param_name)
             deleted = True
 
         for key in list(self._local.keys()):
             if key.startswith(param_name):
                 if not deleted:
-                    rospy.logdebug(
-                        "Deleting param {} from local db.".format(param_name)
-                    )
+                    rospy.logdebug(f"Deleting param {param_name} from local db.")
                     deleted = True
                 del self._local[key]
 
@@ -364,10 +342,10 @@ class ConfigManager(ConfigBase):
             rospy.logerr("New parameter value must be JSON encoded")
             return ImportExportParamResponse(False)
         except (IOError, OSError) as e:
-            rospy.logerr("Error reading file {}: {}".format(req.file_path, e))
+            rospy.logerr(f"Error reading file {req.file_path}: {e}")
             return ImportExportParamResponse(False)
         param_name = self._normalize_key(req.param_name)
-        rospy.logdebug("Import and set param {} to {}.".format(param_name, data))
+        rospy.logdebug(f"Import and set param {param_name} to {data}.")
         self._set_local_param(param_name, data)
         rospy.set_param(param_name, data)
         param_value = json.dumps(data)
@@ -381,14 +359,14 @@ class ConfigManager(ConfigBase):
         param_name = self._normalize_key(req.param_name)
         value = self._get_param(param_name)
         if value is None:
-            rospy.logdebug("Could not find param {}".format(param_name))
+            rospy.logdebug(f"Could not find param {param_name}")
             return ImportExportParamResponse(False)
-        rospy.logdebug("Export param {} with value {}.".format(param_name, value))
+        rospy.logdebug(f"Export param {param_name} with value {value}.")
         try:
             with open(req.file_path, 'wt') as f:
                 json.dump(value, f)
         except (IOError, OSError) as e:
-            rospy.logerr("Error writing file {}: {}".format(req.file_path, e))
+            rospy.logerr(f"Error writing file {req.file_path}: {e}")
             return ImportExportParamResponse(False)
         return ImportExportParamResponse(True)
 
@@ -399,7 +377,7 @@ class ConfigManager(ConfigBase):
         rospy.logdebug("Resetting params.")
         local_names = self._local.keys()[:]
         for name in local_names:
-            rospy.logdebug("Removing param {} from db.".format(name))
+            rospy.logdebug(f"Removing param {name} from db.")
             rospy.delete_param(name)
         self._local.clear()
         self._load_settings_into_rosparam()

@@ -49,12 +49,8 @@ class RedisServer(object):
             self._redis_port = rospy.get_param('~port')
             self._redis_config = rospy.get_param('~config')
 
-        rospy.loginfo(
-            'Redis server address: {}:{}'.format(
-                self._redis_host, self._redis_port
-            )
-        )
-        rospy.loginfo('Redis config: {}'.format(self._redis_config))
+        rospy.loginfo(f"Redis server address: {self._redis_host}:{self._redis_port}")
+        rospy.loginfo(f"Redis config: {self._redis_config}")
 
         self._check_if_redis_server_is_installed()
 
@@ -71,9 +67,7 @@ class RedisServer(object):
             default_port = random.randrange(min_port, max_port)
             count += 1
             if count > MAX_RETRIES:
-                rospy.logerr(
-                    "Can't find a free port to run the test server on."
-                )
+                rospy.logerr("Can't find a free port to run the test server on.")
                 sys.exit(1)
         return default_port
 
@@ -85,16 +79,14 @@ class RedisServer(object):
             match = re.search(r'.*v=(\d+\.\d+\.\d+) .*', redisv.decode())
             self._redis_version = match.group(1)
         except subprocess.CalledProcessError:
-            rospy.logerr('Can\'t find Redis server executable.')
+            rospy.logerr("Can't find Redis server executable.")
             sys.exit(1)
-        rospy.loginfo(
-            'Found Redis server version {}'.format(self._redis_version)
-        )
+        rospy.loginfo(f"Found Redis server version {self._redis_version}")
 
     def _on_node_shutdown(self):
-        rospy.loginfo('Shutting down Redis server')
+        rospy.loginfo("Shutting down Redis server")
         if self._gone_down:
-            rospy.logwarn('It looks like Redis server already died.')
+            rospy.logwarn("It looks like Redis server already died.")
         elif self._redis_process:
             self._redis_process.terminate()
 
@@ -127,19 +119,15 @@ class RedisServer(object):
                     rospy.logerr(stdout.strip())
                 else:
                     rospy.loginfo(stdout.strip())
-                if stdout.find(
-                    'The server is now ready to accept connections on port'
-                ):
+                if stdout.find('The server is now ready to accept connections on port'):
                     self._ready = True
 
         if not rospy.is_shutdown():
-            rospy.logerr('Redis server process stopped')
+            rospy.logerr("Redis server process stopped")
 
         if self._redis_process.returncode != 0:
             rospy.logerr(
-                'Redis server process error. Exit code {}'.format(
-                    self._redis_process.returncode
-                )
+                f"Redis server process error. Exit code {self._redis_process.returncode}"
             )
 
         self._gone_down = True
