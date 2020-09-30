@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 import rospy
+from std_msgs.msg import Bool
 
 MAX_RETRIES = 100
 
@@ -26,6 +27,10 @@ class RedisServer(object):
         self._gone_down = False
         self._ready = False
         self._redis_process = None
+
+        self._ready_pub = rospy.Publisher(
+            '~ready', Bool, latch=True, queue_size=1
+        )
 
         self.test_mode = rospy.get_param("~test_mode", False)
 
@@ -49,7 +54,9 @@ class RedisServer(object):
             self._redis_port = rospy.get_param('~port')
             self._redis_config = rospy.get_param('~config')
 
-        rospy.loginfo(f"Redis server address: {self._redis_host}:{self._redis_port}")
+        rospy.loginfo(
+            f"Redis server address: {self._redis_host}:{self._redis_port}"
+        )
         rospy.loginfo(f"Redis config: {self._redis_config}")
 
         self._check_if_redis_server_is_installed()
@@ -67,7 +74,9 @@ class RedisServer(object):
             default_port = random.randrange(min_port, max_port)
             count += 1
             if count > MAX_RETRIES:
-                rospy.logerr("Can't find a free port to run the test server on.")
+                rospy.logerr(
+                    "Can't find a free port to run the test server on."
+                )
                 sys.exit(1)
         return default_port
 
@@ -119,11 +128,15 @@ class RedisServer(object):
                     rospy.logerr(stdout.strip())
                 else:
                     rospy.loginfo(stdout.strip())
-                if stdout.find('The server is now ready to accept connections on port'):
+                if stdout.find(
+                    'The server is now ready to accept connections on port'
+                ):
                     self._ready = True
+                    self._ready_pub.publish(Bool(True))
 
         if not rospy.is_shutdown():
             rospy.logerr("Redis server process stopped")
+            self._ready_pub.publish(Bool(False))
 
         if self._redis_process.returncode != 0:
             rospy.logerr(
