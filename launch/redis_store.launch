@@ -36,5 +36,7 @@
     <param name="defaults_path" value="$(arg defaults_path)"/>
     <param name="redis_namespace" value="$(arg db_namespace)"/>
     <param name="redis_db" value="$(arg db)"/>
+    <param name="redis_node_name" value="redis_server"/>
+    <param name="redis_node_wait_timeout_s" value="5.0"/>
   </node>
 </launch>
