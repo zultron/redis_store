@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>redis_store</name>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
   <description>
     redis_store wraps up the redis datastructure store in ROS, allowing
     it to be used to store configuration parameters.
