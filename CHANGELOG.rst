@@ -1,6 +1,11 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package redis_store
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+0.1.3 (2020-10-06)
+------------------
+* add pre-commit config
+* cleanup code base for Python 3*
+* fix race condition on noetic
 
 0.1.2 (2020-09-09)
 ------------------
