@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import errno
 import os
 import random
@@ -20,7 +19,7 @@ def is_socket_free(host, port):
     return result != 0
 
 
-class RedisServer(object):
+class RedisServer:
     def __init__(self):
         rospy.init_node("redis_server", anonymous=True)
 
@@ -117,7 +116,7 @@ class RedisServer(object):
         while self._redis_process.poll() is None:
             try:
                 stdout = self._redis_process.stdout.readline()
-            except IOError as e:
+            except OSError as e:
                 if e.errno == errno.EINTR:
                     continue
                 else:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 import rospy
@@ -13,7 +12,7 @@ from redis_store_msgs.srv import (
 )
 
 
-class ConfigBase(object):
+class ConfigBase:
     _GET_PARAM_SRV_NAME = 'config_manager/get_param'
     _SET_PARAM_SRV_NAME = 'config_manager/set_param'
     _SAVE_PARAM_SRV_NAME = 'config_manager/save_param'
