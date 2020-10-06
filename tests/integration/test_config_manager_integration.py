@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 
 import pytest
@@ -164,7 +163,7 @@ def test_export_param_service_exports_data_to_file(node, client, data_file):
 
     assert success is True
     assert os.path.exists(data_file)
-    with open(data_file, 'rt') as f:
+    with open(data_file) as f:
         data = f.read()
     assert data == '["degree", "favorite", "rapid", "pad", "rake"]'
 

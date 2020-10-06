@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # adapted from https://github.com/Attumm/redis-dict
 import json
 from redis import StrictRedis
@@ -8,7 +7,7 @@ from future.utils import python_2_unicode_compatible
 
 
 @python_2_unicode_compatible
-class RedisDict(object):
+class RedisDict:
     def __init__(self, *args, **kwargs):
         self.namespace = ''
         if 'namespace' in kwargs:
@@ -150,7 +149,7 @@ class RedisDict(object):
             self.redis.delete(key)
 
 
-class RedisListIterator(object):
+class RedisListIterator:
     def __init__(self, redis_instance, key, start=0, end=-1):
         # type: (StrictRedis, str, int, int) -> None
         """Creates a redis list iterator.
@@ -181,7 +180,7 @@ class RedisListIterator(object):
     next = __next__
 
 
-class RedisList(object):
+class RedisList:
     """Emulate a python list."""
 
     def __init__(self, redis_instance, key):

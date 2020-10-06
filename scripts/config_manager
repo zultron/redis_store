@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import redis
 import sys
 
@@ -9,7 +8,6 @@ import rospy
 import os
 import collections
 import json
-import six
 
 from redis_store_msgs.msg import ParamUpdate
 from redis_store_msgs.srv import (
@@ -174,7 +172,7 @@ class ConfigManager(ConfigBase):
 
         def flatten(d, c="", f_name=""):
             lst = []
-            for k, v in six.iteritems(d):
+            for k, v in d.items():
                 if isinstance(v, collections.abc.Mapping):
                     lst.extend(flatten(v, c + "/" + k, f_name))
                 else:
@@ -349,12 +347,12 @@ class ConfigManager(ConfigBase):
         Imports the value from data stored in a JSON file to the rosparam and the local value store.
         """
         try:
-            with open(req.file_path, 'rt') as f:
+            with open(req.file_path) as f:
                 data = json.load(f)
         except ValueError:
             rospy.logerr("New parameter value must be JSON encoded")
             return ImportExportParamResponse(False)
-        except (IOError, OSError) as e:
+        except OSError as e:
             rospy.logerr(f"Error reading file {req.file_path}: {e}")
             return ImportExportParamResponse(False)
         param_name = self._normalize_key(req.param_name)
@@ -378,7 +376,7 @@ class ConfigManager(ConfigBase):
         try:
             with open(req.file_path, 'wt') as f:
                 json.dump(value, f)
-        except (IOError, OSError) as e:
+        except OSError as e:
             rospy.logerr(f"Error writing file {req.file_path}: {e}")
             return ImportExportParamResponse(False)
         return ImportExportParamResponse(True)

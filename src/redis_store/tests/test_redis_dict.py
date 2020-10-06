@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 from collections import namedtuple
 
@@ -27,7 +26,7 @@ def create_redis_dict(namespace=TEST_NAMESPACE_PREFIX, **kwargs):
 
 
 def clear_test_namespace(redisdb):
-    for key in redisdb.scan_iter('{}:*'.format(TEST_NAMESPACE_PREFIX)):
+    for key in redisdb.scan_iter(f'{TEST_NAMESPACE_PREFIX}:*'):
         redisdb.delete(key)
 
 
@@ -50,7 +49,7 @@ def test_keys_empty(db):
 
 def test_many_keys(db):
     for i in range(100):
-        db.r['foo{}'.format(i)] = str(i)
+        db.r[f'foo{i}'] = str(i)
 
     keys = db.r.keys()
 
@@ -61,8 +60,8 @@ def test_set_namespace(db):
     """Test that RedisDict keys are inserted with the given namespace."""
     db.r['foo'] = 'bar'
 
-    expected_keys = ['{}:foo'.format(TEST_NAMESPACE_PREFIX)]
-    actual_keys = db.redisdb.keys('{}:*'.format(TEST_NAMESPACE_PREFIX))
+    expected_keys = [f'{TEST_NAMESPACE_PREFIX}:foo']
+    actual_keys = db.redisdb.keys(f'{TEST_NAMESPACE_PREFIX}:*')
 
     assert expected_keys == actual_keys
 
@@ -155,7 +154,7 @@ def test_repr_empty(db):
 def test_repr_nonempty(db):
     """Tests the __repr__ function with keys set."""
     db.r['foobars'] = 'barrbars'
-    expected_repr = str({u'foobars': encode_data('barrbars').decode()})
+    expected_repr = str({'foobars': encode_data('barrbars').decode()})
     actual_repr = repr(db.r)
 
     assert actual_repr == expected_repr
@@ -164,7 +163,7 @@ def test_repr_nonempty(db):
 def test_str_nonempty(db):
     """Tests the __repr__ function with keys set."""
     db.r['foobars'] = 'barrbars'
-    expected_str = str({u'foobars': encode_data('barrbars').decode()})
+    expected_str = str({'foobars': encode_data('barrbars').decode()})
     actual_str = str(db.r)
 
     assert actual_str == expected_str
@@ -204,7 +203,7 @@ def test_chain_set_1(db):
     """Test setting a chain with 1 element."""
     db.r.chain_set(['foo'], 'melons')
 
-    expected_key = '{}:foo'.format(TEST_NAMESPACE_PREFIX)
+    expected_key = f'{TEST_NAMESPACE_PREFIX}:foo'
 
     assert db.redisdb.get(expected_key) == encode_data('melons')
 
@@ -213,7 +212,7 @@ def test_chain_set_2(db):
     """Test setting a chain with 2 elements."""
     db.r.chain_set(['foo', 'bar'], 'melons')
 
-    expected_key = '{}:foo:bar'.format(TEST_NAMESPACE_PREFIX)
+    expected_key = f'{TEST_NAMESPACE_PREFIX}:foo:bar'
 
     assert db.redisdb.get(expected_key) == encode_data('melons')
 
@@ -223,7 +222,7 @@ def test_chain_set_overwrite(db):
     db.r.chain_set(['foo'], 'melons')
     db.r.chain_set(['foo'], 'bananas')
 
-    expected_key = '{}:foo'.format(TEST_NAMESPACE_PREFIX)
+    expected_key = f'{TEST_NAMESPACE_PREFIX}:foo'
 
     assert db.redisdb.get(expected_key) == encode_data('bananas')
 
@@ -271,7 +270,7 @@ def test_expire_context(db):
     with db.r.expire_at(3600):
         db.r['foobar'] = 'barbar'
 
-    actual_ttl = db.redisdb.ttl('{}:foobar'.format(TEST_NAMESPACE_PREFIX))
+    actual_ttl = db.redisdb.ttl(f'{TEST_NAMESPACE_PREFIX}:foobar')
 
     assert actual_ttl == pytest.approx(3600, rel=2)
 
@@ -281,7 +280,7 @@ def test_expire_keyword(db):
     r = create_redis_dict(expire=3600)
 
     r['foobar'] = 'barbar'
-    actual_ttl = db.redisdb.ttl('{}:foobar'.format(TEST_NAMESPACE_PREFIX))
+    actual_ttl = db.redisdb.ttl(f'{TEST_NAMESPACE_PREFIX}:foobar')
 
     assert actual_ttl == pytest.approx(3600, rel=2)
 
@@ -338,7 +337,7 @@ def test_multi_chain_get_nonempty(db):
     db.r.chain_set(['foo', 'baz'], 'borbor')
 
     # redis.mget seems to sort keys in reverse order here
-    expected_result = [u'bazbaz', u'barbar']
+    expected_result = ['bazbaz', 'barbar']
 
     assert set(db.r.multi_chain_get(['foo', 'bar'])) == set(expected_result)
 
@@ -351,7 +350,7 @@ def test_multi_dict_empty(db):
 def test_multi_dict_one_key(db):
     """Tests the multi_dict function with 1 key set."""
     db.r['foobar'] = 'barbar'
-    expected_dict = {u'foobar': u'barbar'}
+    expected_dict = {'foobar': 'barbar'}
     assert db.r.multi_dict('foo') == expected_dict
 
 
@@ -359,7 +358,7 @@ def test_multi_dict_two_keys(db):
     """Tests the multi_dict function with 2 keys set."""
     db.r['foobar'] = 'barbar'
     db.r['foobaz'] = 'bazbaz'
-    expected_dict = {u'foobar': u'barbar', u'foobaz': u'bazbaz'}
+    expected_dict = {'foobar': 'barbar', 'foobaz': 'bazbaz'}
     assert db.r.multi_dict('foo') == expected_dict
 
 
@@ -368,7 +367,7 @@ def test_multi_dict_complex(db):
     db.r['foobar'] = 'barbar'
     db.r['foobaz'] = 'bazbaz'
     db.r['goobar'] = 'borbor'
-    expected_dict = {u'foobar': u'barbar', u'foobaz': u'bazbaz'}
+    expected_dict = {'foobar': 'barbar', 'foobaz': 'bazbaz'}
     assert db.r.multi_dict('foo') == expected_dict
 
 
