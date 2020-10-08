@@ -84,7 +84,7 @@ class RedisServer:
             redisv = subprocess.check_output(
                 ['redis-server', '--version'], universal_newlines=True
             )
-            match = re.search(r'.*v=(\d+\.\d+\.\d+) .*', redisv.decode())
+            match = re.search(r'.*v=(\d+\.\d+\.\d+) .*', redisv)
             self._redis_version = match.group(1)
         except subprocess.CalledProcessError:
             rospy.logerr("Can't find Redis server executable.")
@@ -115,7 +115,7 @@ class RedisServer:
         )
         while self._redis_process.poll() is None:
             try:
-                stdout = self._redis_process.stdout.readline().decode()
+                stdout = self._redis_process.stdout.readline()
             except OSError as e:
                 if e.errno == errno.EINTR:
                     continue
