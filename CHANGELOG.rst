@@ -1,6 +1,11 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package redis_store
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+0.1.4 (2021-02-01)
+------------------
+* Update machinekit_ci to v2
+* @machinekoder #2:  "fix ready signal being emitted too early"
+
 0.1.3 (2020-10-06)
 ------------------
 * add pre-commit config

@@ -40,6 +40,8 @@ dockerBuildContextFiles:
 # Docker image label prefix (default: `io.machinekit.${{package}}`)
 #label_prefix: io.machinekit.mypackage
 
+# Cloudsmith repo namespace, if not the same as GH repo user
+cloudsmith_repo_namespace: zultron
 # Cloudsmith repo slug, if not the same as `package`
 cloudsmith_repo_slug: hal_ros_control
 
