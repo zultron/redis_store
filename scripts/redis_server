@@ -7,6 +7,9 @@ import socket
 import subprocess
 import sys
 
+import redis
+from redis import StrictRedis
+
 import rospy
 from std_msgs.msg import Bool
 
@@ -98,6 +101,15 @@ class RedisServer:
         elif self._redis_process:
             self._redis_process.terminate()
 
+    def _check_ready(self):
+        redis_con = StrictRedis(host=self._redis_host, port=self._redis_port)
+        try:
+            redis_con.ping()
+        except redis.ConnectionError:
+            return False
+        else:
+            return True
+
     def _server_loop(self):
         def block_kill():
             os.setpgrp()
@@ -127,11 +139,10 @@ class RedisServer:
                     rospy.logerr(stdout.strip())
                 else:
                     rospy.loginfo(stdout.strip())
-                if stdout.find(
-                    'The server is now ready to accept connections on port'
-                ):
-                    self._ready = True
-                    self._ready_pub.publish(Bool(True))
+
+            if not self._ready and self._check_ready():
+                self._ready = True
+                self._ready_pub.publish(Bool(True))
 
         if not rospy.is_shutdown():
             rospy.logerr("Redis server process stopped")
