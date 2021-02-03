@@ -1,9 +1,13 @@
 # adapted from https://github.com/Attumm/redis-dict
 import json
-from redis import StrictRedis
+from redis import StrictRedis, ConnectionError
 
 from contextlib import contextmanager
 from future.utils import python_2_unicode_compatible
+
+
+class RedisDictConnectionError(RuntimeError):
+    pass
 
 
 @python_2_unicode_compatible
@@ -147,6 +151,15 @@ class RedisDict:
     def clear(self):
         for key in self._keys():
             self.redis.delete(key)
+
+    def ping(self):
+        try:
+            self.redis.ping()
+        except ConnectionError:
+            kwargs = self.redis.connection_pool.connection_kwargs
+            raise RedisDictConnectionError(
+                f"Connect to Redis at {kwargs['host']}:{kwargs['port']} failed"
+            )
 
 
 class RedisListIterator:

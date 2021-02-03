@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import redis
 import sys
 
 import roslib
@@ -24,7 +23,7 @@ from redis_store_msgs.srv import (
 )
 from std_msgs.msg import Bool
 
-from redis_store import RedisDict
+from redis_store import RedisDict, RedisDictConnectionError
 from redis_store.config import ConfigBase
 import rosparam
 
@@ -128,11 +127,9 @@ class ConfigManager(ConfigBase):
         )
 
         try:
-            self._local.redis.ping()
-        except redis.ConnectionError:
-            rospy.logerr(
-                f"Could not establish a connection to the Redis server {redis_host}:{redis_port}"
-            )
+            self._local.ping()
+        except RedisDictConnectionError as e:
+            rospy.logerr(str(e))
             sys.exit(1)
 
     def _load_defaults(self, path):
