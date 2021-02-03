@@ -31,9 +31,10 @@ import rosparam
 class ConfigManager(ConfigBase):
     def __init__(self):
         rospy.init_node("config_manager")
+        rospy.loginfo("Started config_manager node")
 
         redis_node_name = rospy.get_param('~redis_node_name', 'redis_server')
-        wait_timeout_s = rospy.get_param('~redis_node_wait_timeout_s', 5.0)
+        wait_timeout_s = rospy.get_param('~redis_node_wait_timeout_s', 10.0)
         self._wait_for_redis_node_ready(redis_node_name, wait_timeout_s)
         self._create_dbs()
         self._load_defaults(rospy.get_param("~defaults_path"))
