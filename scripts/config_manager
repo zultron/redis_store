@@ -391,7 +391,7 @@ class ConfigManager(ConfigBase):
         self._local.clear()
         self._load_settings_into_rosparam()
 
-        for name in set(self._defaults.keys() + local_names):
+        for name in set(list(self._defaults.keys()) + local_names):
             value = self._get_param(name)
             self._update_pub.publish(ParamUpdate(name, json.dumps(value)))
 
