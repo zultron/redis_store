@@ -305,7 +305,8 @@ class ConfigManager(ConfigBase):
         """
         if not rospy.has_param(req.param_name):
             rospy.logerr(
-                "Trying to set a parameter from ros parameter server, but it is not on server."
+                f"Parameter '{req.param_name}' missing on"
+                "ros parameter server; unable to set in redis"
             )
             return SaveDeleteParamResponse(False)
 
