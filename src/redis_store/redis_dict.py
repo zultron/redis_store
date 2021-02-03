@@ -12,17 +12,10 @@ class RedisDictConnectionError(RuntimeError):
 
 @python_2_unicode_compatible
 class RedisDict:
-    def __init__(self, *args, **kwargs):
-        self.namespace = ''
-        if 'namespace' in kwargs:
-            # Todo validate namespace
-            self.namespace = kwargs['namespace'] + ':'
-            del kwargs['namespace']
-
-        self.expire = None
-        if 'expire' in kwargs:
-            self.expire = kwargs['expire']
-            del kwargs['expire']
+    def __init__(self, *args, namespace=None, expire=None, **kwargs):
+        # Todo validate namespace
+        self.namespace = '' if namespace is None else f'{namespace}:'
+        self.expire = expire
 
         self.redis = StrictRedis(*args, decode_responses=True, **kwargs)
         self.sentinel_none = '<META __None__ 9cab>'
