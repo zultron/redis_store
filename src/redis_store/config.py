@@ -1,6 +1,7 @@
 import json
 
 import rospy
+import threading
 
 from redis_store_msgs.msg import ParamUpdate
 from redis_store_msgs.srv import (
@@ -31,6 +32,7 @@ class ConfigClient(ConfigBase):
             )
         else:
             self._update_sub = None
+        self._lock = threading.Lock()
         self._get_param = rospy.ServiceProxy(self._GET_PARAM_SRV_NAME, GetParam)
         self._set_param = rospy.ServiceProxy(self._SET_PARAM_SRV_NAME, SetParam)
         self._save_param = rospy.ServiceProxy(
@@ -55,34 +57,41 @@ class ConfigClient(ConfigBase):
         self._get_param.wait_for_service(timeout)
 
     def get_param(self, name):
-        response = self._get_param(name)
+        with self._lock:
+            response = self._get_param(name)
         decoded = None
         if response.success:
             decoded = json.loads(response.param_value)
         return decoded
 
     def set_param(self, name, value):
-        response = self._set_param(name, json.dumps(value))
+        with self._lock:
+            response = self._set_param(name, json.dumps(value))
         return response.success
 
     def save_param(self, name):
-        response = self._save_param(name)
+        with self._lock:
+            response = self._save_param(name)
         return response.success
 
     def delete_param(self, name):
-        response = self._delete_param(name)
+        with self._lock:
+            response = self._delete_param(name)
         return response.success
 
     def import_param(self, name, file_path):
-        response = self._import_param(name, file_path)
+        with self._lock:
+            response = self._import_param(name, file_path)
         return response.success
 
     def export_param(self, name, file_path):
-        response = self._export_param(name, file_path)
+        with self._lock:
+            response = self._export_param(name, file_path)
         return response.success
 
     def reset_params(self):
-        response = self._reset_params()
+        with self._lock:
+            response = self._reset_params()
         return response.success
 
     def stop(self):
