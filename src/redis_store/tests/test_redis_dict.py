@@ -60,7 +60,7 @@ def test_set_namespace(db):
     """Test that RedisDict keys are inserted with the given namespace."""
     db.r['foo'] = 'bar'
 
-    expected_keys = [f'{TEST_NAMESPACE_PREFIX}:foo']
+    expected_keys = [f'{TEST_NAMESPACE_PREFIX}:foo'.encode()]
     actual_keys = db.redisdb.keys(f'{TEST_NAMESPACE_PREFIX}:*')
 
     assert expected_keys == actual_keys
@@ -154,7 +154,7 @@ def test_repr_empty(db):
 def test_repr_nonempty(db):
     """Tests the __repr__ function with keys set."""
     db.r['foobars'] = 'barrbars'
-    expected_repr = str({'foobars': encode_data('barrbars').decode()})
+    expected_repr = str({'foobars': encode_data('barrbars')})
     actual_repr = repr(db.r)
 
     assert actual_repr == expected_repr
@@ -163,7 +163,7 @@ def test_repr_nonempty(db):
 def test_str_nonempty(db):
     """Tests the __repr__ function with keys set."""
     db.r['foobars'] = 'barrbars'
-    expected_str = str({'foobars': encode_data('barrbars').decode()})
+    expected_str = str({'foobars': encode_data('barrbars')})
     actual_str = str(db.r)
 
     assert actual_str == expected_str
@@ -205,7 +205,7 @@ def test_chain_set_1(db):
 
     expected_key = f'{TEST_NAMESPACE_PREFIX}:foo'
 
-    assert db.redisdb.get(expected_key) == encode_data('melons')
+    assert db.redisdb.get(expected_key).decode() == encode_data('melons')
 
 
 def test_chain_set_2(db):
@@ -214,7 +214,7 @@ def test_chain_set_2(db):
 
     expected_key = f'{TEST_NAMESPACE_PREFIX}:foo:bar'
 
-    assert db.redisdb.get(expected_key) == encode_data('melons')
+    assert db.redisdb.get(expected_key).decode() == encode_data('melons')
 
 
 def test_chain_set_overwrite(db):
@@ -224,7 +224,7 @@ def test_chain_set_overwrite(db):
 
     expected_key = f'{TEST_NAMESPACE_PREFIX}:foo'
 
-    assert db.redisdb.get(expected_key) == encode_data('bananas')
+    assert db.redisdb.get(expected_key).decode() == encode_data('bananas')
 
 
 def test_chain_get_1(db):

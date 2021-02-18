@@ -6,6 +6,7 @@
   <arg name="defaults_path" default=""/>
   <arg name="db_namespace" default="ros"/>
   <arg name="db" default="0"/>
+  <arg name="node_wait_timeout_s" default="10.0"/>
 
   <arg name="test_mode" default="false" />
 
@@ -32,11 +33,16 @@
     </group>
   </group>
 
-  <node pkg="redis_store" type="config_manager" name="config_manager" output="screen">
+  <node pkg="redis_store"
+        type="config_manager"
+        name="config_manager"
+        output="screen"
+        required="true"
+        >
     <param name="defaults_path" value="$(arg defaults_path)"/>
     <param name="redis_namespace" value="$(arg db_namespace)"/>
     <param name="redis_db" value="$(arg db)"/>
     <param name="redis_node_name" value="redis_server"/>
-    <param name="redis_node_wait_timeout_s" value="5.0"/>
+    <param name="redis_node_wait_timeout_s" value="$(arg node_wait_timeout_s)"/>
   </node>
 </launch>

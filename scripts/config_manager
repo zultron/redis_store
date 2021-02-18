@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import redis
 import sys
 
 import roslib
@@ -24,7 +23,7 @@ from redis_store_msgs.srv import (
 )
 from std_msgs.msg import Bool
 
-from redis_store import RedisDict
+from redis_store import RedisDict, RedisDictConnectionError
 from redis_store.config import ConfigBase
 import rosparam
 
@@ -32,9 +31,10 @@ import rosparam
 class ConfigManager(ConfigBase):
     def __init__(self):
         rospy.init_node("config_manager")
+        rospy.loginfo("Started config_manager node")
 
         redis_node_name = rospy.get_param('~redis_node_name', 'redis_server')
-        wait_timeout_s = rospy.get_param('~redis_node_wait_timeout_s', 5.0)
+        wait_timeout_s = rospy.get_param('~redis_node_wait_timeout_s', 10.0)
         self._wait_for_redis_node_ready(redis_node_name, wait_timeout_s)
         self._create_dbs()
         self._load_defaults(rospy.get_param("~defaults_path"))
@@ -128,11 +128,9 @@ class ConfigManager(ConfigBase):
         )
 
         try:
-            self._local.redis.ping()
-        except redis.ConnectionError:
-            rospy.logerr(
-                f"Could not establish a connection to the Redis server {redis_host}:{redis_port}"
-            )
+            self._local.ping()
+        except RedisDictConnectionError as e:
+            rospy.logerr(str(e))
             sys.exit(1)
 
     def _load_defaults(self, path):
@@ -307,7 +305,8 @@ class ConfigManager(ConfigBase):
         """
         if not rospy.has_param(req.param_name):
             rospy.logerr(
-                "Trying to set a parameter from ros parameter server, but it is not on server."
+                f"Parameter '{req.param_name}' missing on"
+                "ros parameter server; unable to set in redis"
             )
             return SaveDeleteParamResponse(False)
 
@@ -393,7 +392,7 @@ class ConfigManager(ConfigBase):
         self._local.clear()
         self._load_settings_into_rosparam()
 
-        for name in set(self._defaults.keys() + local_names):
+        for name in set(list(self._defaults.keys()) + local_names):
             value = self._get_param(name)
             self._update_pub.publish(ParamUpdate(name, json.dumps(value)))
 
